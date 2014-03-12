@@ -626,12 +626,12 @@ an outbound stream) consists of three steps:</p>
                 <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
               <ul>
-<li>handling stream errors as connection errors</li>
+<li>forwarding connection errors from streams</li>
 </ul>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  stream.on(<span class="string">'error'</span>, <span class="keyword">this</span>.emit.bind(<span class="keyword">this</span>, <span class="string">'error'</span>));
+            <div class="content"><div class='highlight'><pre>  stream.on(<span class="string">'connectionError'</span>, <span class="keyword">this</span>.emit.bind(<span class="keyword">this</span>, <span class="string">'error'</span>));
 
   <span class="keyword">return</span> id;
 };</pre></div></div>
@@ -1079,7 +1079,6 @@ implemented by child classes. It forwards the given frame to the appropriate str
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="keyword">var</span> defaultSettings = {
-  SETTINGS_FLOW_CONTROL_OPTIONS: <span class="literal">true</span>
 };</pre></div></div>
             
         </li>
@@ -1523,15 +1522,9 @@ Connection.prototype._receiveGoaway = <span class="function"><span class="keywor
             <div class="content"><div class='highlight'><pre>  <span class="keyword">this</span>._initialStreamWindowSize = INITIAL_STREAM_WINDOW_SIZE;
   <span class="keyword">this</span>.on(<span class="string">'new_stream'</span>, <span class="function"><span class="keyword">function</span><span class="params">(stream)</span> {</span>
     stream.upstream.setInitialWindow(<span class="keyword">this</span>._initialStreamWindowSize);
-    <span class="keyword">if</span> (<span class="keyword">this</span>._remoteFlowControlDisabled) {
-      stream.upstream.disableRemoteFlowControl();
-    }
   });
   <span class="keyword">this</span>.on(<span class="string">'RECEIVING_SETTINGS_INITIAL_WINDOW_SIZE'</span>, <span class="keyword">this</span>._setInitialStreamWindowSize);
-  <span class="keyword">this</span>.on(<span class="string">'RECEIVING_SETTINGS_FLOW_CONTROL_OPTIONS'</span>, <span class="keyword">this</span>._setLocalFlowControl);
-  <span class="keyword">this</span>.on(<span class="string">'SENDING_SETTINGS_FLOW_CONTROL_OPTIONS'</span>, <span class="keyword">this</span>._setRemoteFlowControl);
   <span class="keyword">this</span>._streamIds[<span class="number">0</span>].upstream.setInitialWindow = <span class="function"><span class="keyword">function</span> <span class="title">noop</span><span class="params">()</span> {</span>};
-  <span class="keyword">this</span>._streamIds[<span class="number">0</span>].upstream.disableRemoteFlowControl = <span class="function"><span class="keyword">function</span> <span class="title">noop</span><span class="params">()</span> {</span>};
 };</pre></div></div>
             
         </li>
@@ -1575,42 +1568,6 @@ the difference between the new value and the old value.</p>
     <span class="keyword">this</span>._streamIds.forEach(<span class="function"><span class="keyword">function</span><span class="params">(stream)</span> {</span>
       stream.upstream.setInitialWindow(size);
     });
-  }
-};</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-72">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-72">&#182;</a>
-              </div>
-              <p><code>_setStreamFlowControl()</code> may be used to disable/enable flow control. In practice, it is just
-for turning off flow control since it can not be turned on.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>Connection.prototype._setLocalFlowControl = <span class="function"><span class="keyword">function</span> <span class="title">_setLocalFlowControl</span><span class="params">(disable)</span> {</span>
-  <span class="keyword">if</span> (disable) {
-    <span class="keyword">this</span>._increaseWindow(<span class="literal">Infinity</span>);
-    <span class="keyword">this</span>._setInitialStreamWindowSize(<span class="literal">Infinity</span>);
-  } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">this</span>._initialStreamWindowSize === <span class="literal">Infinity</span>) {
-    <span class="keyword">this</span>._log.error(<span class="string">'Trying to re-enable flow control after it was turned off.'</span>);
-    <span class="keyword">this</span>.emit(<span class="string">'error'</span>, <span class="string">'FLOW_CONTROL_ERROR'</span>);
-  }
-};
-
-Connection.prototype._setRemoteFlowControl = <span class="function"><span class="keyword">function</span> <span class="title">_setRemoteFlowControl</span><span class="params">(disable)</span> {</span>
-  <span class="keyword">if</span> (disable) {
-    <span class="keyword">this</span>.disableRemoteFlowControl();
-    <span class="keyword">this</span>._streamIds.forEach(<span class="function"><span class="keyword">function</span><span class="params">(stream)</span> {</span>
-      stream.upstream.disableRemoteFlowControl();
-    });
-  } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">this</span>._remoteFlowControlDisabled) {
-    <span class="keyword">this</span>._log.error(<span class="string">'Trying to re-enable flow control after it was turned off.'</span>);
-    <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">'Trying to re-enable flow control after it was turned off.'</span>);
   }
 };</pre></div></div>
             

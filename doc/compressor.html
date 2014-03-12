@@ -258,7 +258,7 @@ Insertion Point       Drop Point</code></pre>
     dropPoint -= <span class="number">1</span>;
     <span class="keyword">var</span> dropped = <span class="keyword">this</span>.splice(dropPoint, <span class="number">1</span>)[<span class="number">0</span>];
     <span class="keyword">this</span>._size -= dropped._size;
-    droppedEntries[droppedEntries] = dropped;
+    droppedEntries[dropPoint] = dropped;
   }
   <span class="keyword">return</span> droppedEntries;
 };
@@ -414,12 +414,11 @@ until the end os the stream, and then processes the whole header block at once.<
             </div>
             
             <div class="content"><div class='highlight'><pre>util.inherits(HeaderSetDecompressor, TransformStream);
-<span class="function"><span class="keyword">function</span> <span class="title">HeaderSetDecompressor</span><span class="params">(log, table, huffmanTable)</span> {</span>
+<span class="function"><span class="keyword">function</span> <span class="title">HeaderSetDecompressor</span><span class="params">(log, table)</span> {</span>
   TransformStream.call(<span class="keyword">this</span>, { objectMode: <span class="literal">true</span> });
 
   <span class="keyword">this</span>._log = log.child({ component: <span class="string">'compressor'</span> });
   <span class="keyword">this</span>._table = table;
-  <span class="keyword">this</span>._huffmanTable = huffmanTable;
   <span class="keyword">this</span>._chunks = [];
 }</pre></div></div>
             
@@ -488,7 +487,8 @@ Literal:
               <ul>
 <li>An <em>indexed representation</em> with an index value of 0 (in our representation, it means -1)
 entails the following actions:<ul>
-<li>The reference set is emptied.</li>
+<li>If the following byte starts with a set bit, the reference set is emptied.</li>
+<li>Else, reduce the size of the header table to the value encoded with a 7-bit prefix</li>
 </ul>
 </li>
 <li>An <em>indexed representation</em> corresponding to an entry <em>present</em> in the reference set
@@ -521,8 +521,26 @@ this new entry didn&#39;t fit in the header table)</li>
     entry = <span class="keyword">this</span>._table[index];
 
     <span class="keyword">if</span> (index == -<span class="number">1</span>) {
-      <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="keyword">this</span>._table.length; i++) {
-        <span class="keyword">this</span>._table[i].reference = <span class="literal">false</span>;
+      <span class="keyword">if</span> (rep.index) {
+        <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="keyword">this</span>._table.length; i++) {
+          <span class="keyword">this</span>._table[i].reference = <span class="literal">false</span>;
+        }
+      } <span class="keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>Set a new maximum size</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">this</span>.setTableSizeLimit(rep.name);
       }
     }
 
@@ -547,11 +565,11 @@ this new entry didn&#39;t fit in the header table)</li>
         </li>
         
         
-        <li id="section-16">
+        <li id="section-17">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-16">&#182;</a>
+                <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
               <ul>
 <li>A <em>literal representation</em> that is <em>not added</em> to the header table entails the following
@@ -590,11 +608,11 @@ actions:<ul>
         </li>
         
         
-        <li id="section-17">
+        <li id="section-18">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-17">&#182;</a>
+                <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <p><code>_flush</code> is the implementation of the <a href="http://nodejs.org/api/stream.html#stream_transform_flush_callback">corresponding virtual function</a> of the
 TransformStream class. The whole decompressing process is done in <code>_flush</code>. It gets called when
@@ -608,11 +626,11 @@ the input stream is over.</p>
         </li>
         
         
-        <li id="section-18">
+        <li id="section-19">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-18">&#182;</a>
+                <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
               <ul>
 <li>processes the header representations</li>
@@ -622,17 +640,17 @@ the input stream is over.</p>
             
             <div class="content"><div class='highlight'><pre>  buffer.cursor = <span class="number">0</span>;
   <span class="keyword">while</span> (buffer.cursor &lt; buffer.length) {
-    <span class="keyword">this</span>._execute(HeaderSetDecompressor.header(buffer, <span class="keyword">this</span>._huffmanTable));
+    <span class="keyword">this</span>._execute(HeaderSetDecompressor.header(buffer));
   }</pre></div></div>
             
         </li>
         
         
-        <li id="section-19">
+        <li id="section-20">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-19">&#182;</a>
+                <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
               <ul>
 <li><a href="http://tools.ietf.org/html/draft-ietf-httpbis-header-compression-05#section-3.2.2">emits the reference set</a></li>
@@ -654,11 +672,11 @@ the input stream is over.</p>
         </li>
         
         
-        <li id="section-20">
+        <li id="section-21">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
+                <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
               <h2 id="the-headersetcompressor-class">The HeaderSetCompressor class</h2>
 
@@ -667,11 +685,11 @@ the input stream is over.</p>
         </li>
         
         
-        <li id="section-21">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <p>A <code>HeaderSetCompressor</code> instance is a transform stream that can be used to <em>compress a single
 header set</em>. Its input is a stream of <code>[name, value]</code> pairs and its output is a stream of
@@ -683,12 +701,11 @@ compression algorithm can probably be improved in the future.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>util.inherits(HeaderSetCompressor, TransformStream);
-<span class="function"><span class="keyword">function</span> <span class="title">HeaderSetCompressor</span><span class="params">(log, table, huffmanTable)</span> {</span>
+<span class="function"><span class="keyword">function</span> <span class="title">HeaderSetCompressor</span><span class="params">(log, table)</span> {</span>
   TransformStream.call(<span class="keyword">this</span>, { objectMode: <span class="literal">true</span> });
 
   <span class="keyword">this</span>._log = log.child({ component: <span class="string">'compressor'</span> });
   <span class="keyword">this</span>._table = table;
-  <span class="keyword">this</span>._huffmanTable = huffmanTable;
   <span class="keyword">this</span>.push = TransformStream.prototype.push.bind(<span class="keyword">this</span>);
 }
 
@@ -697,7 +714,7 @@ HeaderSetCompressor.prototype.send = <span class="function"><span class="keyword
                   <span class="string">'Emitting header representation'</span>);
 
   <span class="keyword">if</span> (!rep.chunks) {
-    rep.chunks = HeaderSetCompressor.header(rep, <span class="keyword">this</span>._huffmanTable);
+    rep.chunks = HeaderSetCompressor.header(rep);
   }
   rep.chunks.forEach(<span class="keyword">this</span>.push);
 };</pre></div></div>
@@ -705,11 +722,11 @@ HeaderSetCompressor.prototype.send = <span class="function"><span class="keyword
         </li>
         
         
-        <li id="section-22">
+        <li id="section-23">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <p><code>_transform</code> is the implementation of the <a href="http://nodejs.org/api/stream.html#stream_transform_transform_chunk_encoding_callback">corresponding virtual function</a> of the
 TransformStream class. It processes the input headers one by one:</p>
@@ -724,11 +741,11 @@ TransformStream class. It processes the input headers one by one:</p>
         </li>
         
         
-        <li id="section-23">
+        <li id="section-24">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
               <ul>
 <li>tries to find full (name, value) or name match in the header table</li>
@@ -752,11 +769,11 @@ TransformStream class. It processes the input headers one by one:</p>
         </li>
         
         
-        <li id="section-24">
+        <li id="section-25">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
+                <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <ul>
 <li><p>if there&#39;s full match, it will be an indexed representation (or more than one) depending
@@ -826,11 +843,11 @@ in the reference set (that means don&#39;t remove at the end of the encoding pro
         </li>
         
         
-        <li id="section-25">
+        <li id="section-26">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-25">&#182;</a>
+                <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
               <ul>
 <li>otherwise, it will be a literal representation (with a name index if there&#39;s a name match)</li>
@@ -848,6 +865,7 @@ in the reference set (that means don&#39;t remove at the end of the encoding pro
       entry.reference = <span class="literal">true</span>;
       <span class="keyword">var</span> droppedEntries = <span class="keyword">this</span>._table.add(entry);
       <span class="keyword">for</span> (droppedIndex <span class="keyword">in</span> droppedEntries) {
+        droppedIndex = Number(droppedIndex)
         <span class="keyword">var</span> dropped = droppedEntries[droppedIndex];
         <span class="keyword">if</span> (dropped.keep) {
           rep = { name: droppedIndex, value: droppedIndex, index: <span class="literal">false</span> };
@@ -866,11 +884,11 @@ in the reference set (that means don&#39;t remove at the end of the encoding pro
         </li>
         
         
-        <li id="section-26">
+        <li id="section-27">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
+                <a class="pilcrow" href="#section-27">&#182;</a>
               </div>
               <p><code>_flush</code> is the implementation of the <a href="http://nodejs.org/api/stream.html#stream_transform_flush_callback">corresponding virtual function</a> of the
 TransformStream class. It gets called when there&#39;s no more header to compress. The final step:</p>
@@ -882,11 +900,11 @@ TransformStream class. It gets called when there&#39;s no more header to compres
         </li>
         
         
-        <li id="section-27">
+        <li id="section-28">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
+                <a class="pilcrow" href="#section-28">&#182;</a>
               </div>
               <ul>
 <li>removing entries from the header set that are not marked to be kept or emitted</li>
@@ -910,11 +928,11 @@ TransformStream class. It gets called when there&#39;s no more header to compres
         </li>
         
         
-        <li id="section-28">
+        <li id="section-29">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
               <h2 id="-detailed-format-http-tools-ietf-org-html-draft-ietf-httpbis-header-compression-05-section-4-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-header-compression-05#section-4">Detailed Format</a></h2>
 
@@ -923,11 +941,11 @@ TransformStream class. It gets called when there&#39;s no more header to compres
         </li>
         
         
-        <li id="section-29">
+        <li id="section-30">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-30">&#182;</a>
               </div>
               <h3 id="integer-representation">Integer representation</h3>
 <p>The algorithm to represent an integer I is as follows:</p>
@@ -979,11 +997,11 @@ TransformStream class. It gets called when there&#39;s no more header to compres
         </li>
         
         
-        <li id="section-30">
+        <li id="section-31">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
               <p>The inverse algorithm:</p>
 <ol>
@@ -1028,11 +1046,11 @@ TransformStream class. It gets called when there&#39;s no more header to compres
         </li>
         
         
-        <li id="section-31">
+        <li id="section-32">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
+                <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
               <h3 id="huffman-encoding">Huffman Encoding</h3>
 
@@ -1140,11 +1158,11 @@ HuffmanTable.prototype.decode = <span class="function"><span class="keyword">fun
         </li>
         
         
-        <li id="section-32">
+        <li id="section-33">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
+                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <p>The initializer arrays for the Huffman tables are generated with feeding the tables from the
 spec to this sed command:</p>
@@ -1152,7 +1170,7 @@ spec to this sed command:</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>HuffmanTable.requestHuffmanTable = <span class="keyword">new</span> HuffmanTable([
+            <div class="content"><div class='highlight'><pre>HuffmanTable.huffmanTable = <span class="keyword">new</span> HuffmanTable([
   <span class="string">'111111111111111111110111010'</span>,
   <span class="string">'111111111111111111110111011'</span>,
   <span class="string">'111111111111111111110111100'</span>,
@@ -1410,276 +1428,16 @@ spec to this sed command:</p>
   <span class="string">'11111111111111111111011010'</span>,
   <span class="string">'11111111111111111111011011'</span>,
   <span class="string">'11111111111111111111011100'</span>
-]);
-
-HuffmanTable.responseHuffmanTable = <span class="keyword">new</span> HuffmanTable([
-  <span class="string">'1111111111111111110111100'</span>,
-  <span class="string">'1111111111111111110111101'</span>,
-  <span class="string">'1111111111111111110111110'</span>,
-  <span class="string">'1111111111111111110111111'</span>,
-  <span class="string">'1111111111111111111000000'</span>,
-  <span class="string">'1111111111111111111000001'</span>,
-  <span class="string">'1111111111111111111000010'</span>,
-  <span class="string">'1111111111111111111000011'</span>,
-  <span class="string">'1111111111111111111000100'</span>,
-  <span class="string">'1111111111111111111000101'</span>,
-  <span class="string">'1111111111111111111000110'</span>,
-  <span class="string">'1111111111111111111000111'</span>,
-  <span class="string">'1111111111111111111001000'</span>,
-  <span class="string">'1111111111111111111001001'</span>,
-  <span class="string">'1111111111111111111001010'</span>,
-  <span class="string">'1111111111111111111001011'</span>,
-  <span class="string">'1111111111111111111001100'</span>,
-  <span class="string">'1111111111111111111001101'</span>,
-  <span class="string">'1111111111111111111001110'</span>,
-  <span class="string">'1111111111111111111001111'</span>,
-  <span class="string">'1111111111111111111010000'</span>,
-  <span class="string">'1111111111111111111010001'</span>,
-  <span class="string">'1111111111111111111010010'</span>,
-  <span class="string">'1111111111111111111010011'</span>,
-  <span class="string">'1111111111111111111010100'</span>,
-  <span class="string">'1111111111111111111010101'</span>,
-  <span class="string">'1111111111111111111010110'</span>,
-  <span class="string">'1111111111111111111010111'</span>,
-  <span class="string">'1111111111111111111011000'</span>,
-  <span class="string">'1111111111111111111011001'</span>,
-  <span class="string">'1111111111111111111011010'</span>,
-  <span class="string">'1111111111111111111011011'</span>,
-  <span class="string">'0000'</span>,
-  <span class="string">'111111111010'</span>,
-  <span class="string">'1101010'</span>,
-  <span class="string">'1111111111010'</span>,
-  <span class="string">'11111111111100'</span>,
-  <span class="string">'111101100'</span>,
-  <span class="string">'1111111000'</span>,
-  <span class="string">'1111111111011'</span>,
-  <span class="string">'111101101'</span>,
-  <span class="string">'111101110'</span>,
-  <span class="string">'111111111011'</span>,
-  <span class="string">'11111111010'</span>,
-  <span class="string">'100010'</span>,
-  <span class="string">'100011'</span>,
-  <span class="string">'100100'</span>,
-  <span class="string">'1101011'</span>,
-  <span class="string">'0001'</span>,
-  <span class="string">'0010'</span>,
-  <span class="string">'0011'</span>,
-  <span class="string">'01000'</span>,
-  <span class="string">'01001'</span>,
-  <span class="string">'01010'</span>,
-  <span class="string">'100101'</span>,
-  <span class="string">'100110'</span>,
-  <span class="string">'01011'</span>,
-  <span class="string">'01100'</span>,
-  <span class="string">'01101'</span>,
-  <span class="string">'111101111'</span>,
-  <span class="string">'1111111111111010'</span>,
-  <span class="string">'1101100'</span>,
-  <span class="string">'1111111111100'</span>,
-  <span class="string">'111111111100'</span>,
-  <span class="string">'1111111111111011'</span>,
-  <span class="string">'1101101'</span>,
-  <span class="string">'11101010'</span>,
-  <span class="string">'11101011'</span>,
-  <span class="string">'11101100'</span>,
-  <span class="string">'11101101'</span>,
-  <span class="string">'11101110'</span>,
-  <span class="string">'100111'</span>,
-  <span class="string">'111110000'</span>,
-  <span class="string">'11101111'</span>,
-  <span class="string">'11110000'</span>,
-  <span class="string">'1111111001'</span>,
-  <span class="string">'111110001'</span>,
-  <span class="string">'101000'</span>,
-  <span class="string">'11110001'</span>,
-  <span class="string">'11110010'</span>,
-  <span class="string">'111110010'</span>,
-  <span class="string">'1111111010'</span>,
-  <span class="string">'111110011'</span>,
-  <span class="string">'101001'</span>,
-  <span class="string">'01110'</span>,
-  <span class="string">'111110100'</span>,
-  <span class="string">'111110101'</span>,
-  <span class="string">'11110011'</span>,
-  <span class="string">'1111111011'</span>,
-  <span class="string">'111110110'</span>,
-  <span class="string">'1111111100'</span>,
-  <span class="string">'11111111011'</span>,
-  <span class="string">'1111111111101'</span>,
-  <span class="string">'11111111100'</span>,
-  <span class="string">'111111111111100'</span>,
-  <span class="string">'111110111'</span>,
-  <span class="string">'11111111111111110'</span>,
-  <span class="string">'01111'</span>,
-  <span class="string">'1101110'</span>,
-  <span class="string">'101010'</span>,
-  <span class="string">'101011'</span>,
-  <span class="string">'10000'</span>,
-  <span class="string">'1101111'</span>,
-  <span class="string">'1110000'</span>,
-  <span class="string">'1110001'</span>,
-  <span class="string">'101100'</span>,
-  <span class="string">'111111000'</span>,
-  <span class="string">'111111001'</span>,
-  <span class="string">'1110010'</span>,
-  <span class="string">'101101'</span>,
-  <span class="string">'101110'</span>,
-  <span class="string">'101111'</span>,
-  <span class="string">'110000'</span>,
-  <span class="string">'111111010'</span>,
-  <span class="string">'110001'</span>,
-  <span class="string">'110010'</span>,
-  <span class="string">'110011'</span>,
-  <span class="string">'110100'</span>,
-  <span class="string">'1110011'</span>,
-  <span class="string">'11110100'</span>,
-  <span class="string">'1110100'</span>,
-  <span class="string">'11110101'</span>,
-  <span class="string">'111111011'</span>,
-  <span class="string">'1111111111111100'</span>,
-  <span class="string">'11111111111101'</span>,
-  <span class="string">'1111111111111101'</span>,
-  <span class="string">'1111111111111110'</span>,
-  <span class="string">'1111111111111111111011100'</span>,
-  <span class="string">'1111111111111111111011101'</span>,
-  <span class="string">'1111111111111111111011110'</span>,
-  <span class="string">'1111111111111111111011111'</span>,
-  <span class="string">'1111111111111111111100000'</span>,
-  <span class="string">'1111111111111111111100001'</span>,
-  <span class="string">'1111111111111111111100010'</span>,
-  <span class="string">'1111111111111111111100011'</span>,
-  <span class="string">'1111111111111111111100100'</span>,
-  <span class="string">'1111111111111111111100101'</span>,
-  <span class="string">'1111111111111111111100110'</span>,
-  <span class="string">'1111111111111111111100111'</span>,
-  <span class="string">'1111111111111111111101000'</span>,
-  <span class="string">'1111111111111111111101001'</span>,
-  <span class="string">'1111111111111111111101010'</span>,
-  <span class="string">'1111111111111111111101011'</span>,
-  <span class="string">'1111111111111111111101100'</span>,
-  <span class="string">'1111111111111111111101101'</span>,
-  <span class="string">'1111111111111111111101110'</span>,
-  <span class="string">'1111111111111111111101111'</span>,
-  <span class="string">'1111111111111111111110000'</span>,
-  <span class="string">'1111111111111111111110001'</span>,
-  <span class="string">'1111111111111111111110010'</span>,
-  <span class="string">'1111111111111111111110011'</span>,
-  <span class="string">'1111111111111111111110100'</span>,
-  <span class="string">'1111111111111111111110101'</span>,
-  <span class="string">'1111111111111111111110110'</span>,
-  <span class="string">'1111111111111111111110111'</span>,
-  <span class="string">'1111111111111111111111000'</span>,
-  <span class="string">'1111111111111111111111001'</span>,
-  <span class="string">'1111111111111111111111010'</span>,
-  <span class="string">'1111111111111111111111011'</span>,
-  <span class="string">'1111111111111111111111100'</span>,
-  <span class="string">'1111111111111111111111101'</span>,
-  <span class="string">'1111111111111111111111110'</span>,
-  <span class="string">'1111111111111111111111111'</span>,
-  <span class="string">'111111111111111110000000'</span>,
-  <span class="string">'111111111111111110000001'</span>,
-  <span class="string">'111111111111111110000010'</span>,
-  <span class="string">'111111111111111110000011'</span>,
-  <span class="string">'111111111111111110000100'</span>,
-  <span class="string">'111111111111111110000101'</span>,
-  <span class="string">'111111111111111110000110'</span>,
-  <span class="string">'111111111111111110000111'</span>,
-  <span class="string">'111111111111111110001000'</span>,
-  <span class="string">'111111111111111110001001'</span>,
-  <span class="string">'111111111111111110001010'</span>,
-  <span class="string">'111111111111111110001011'</span>,
-  <span class="string">'111111111111111110001100'</span>,
-  <span class="string">'111111111111111110001101'</span>,
-  <span class="string">'111111111111111110001110'</span>,
-  <span class="string">'111111111111111110001111'</span>,
-  <span class="string">'111111111111111110010000'</span>,
-  <span class="string">'111111111111111110010001'</span>,
-  <span class="string">'111111111111111110010010'</span>,
-  <span class="string">'111111111111111110010011'</span>,
-  <span class="string">'111111111111111110010100'</span>,
-  <span class="string">'111111111111111110010101'</span>,
-  <span class="string">'111111111111111110010110'</span>,
-  <span class="string">'111111111111111110010111'</span>,
-  <span class="string">'111111111111111110011000'</span>,
-  <span class="string">'111111111111111110011001'</span>,
-  <span class="string">'111111111111111110011010'</span>,
-  <span class="string">'111111111111111110011011'</span>,
-  <span class="string">'111111111111111110011100'</span>,
-  <span class="string">'111111111111111110011101'</span>,
-  <span class="string">'111111111111111110011110'</span>,
-  <span class="string">'111111111111111110011111'</span>,
-  <span class="string">'111111111111111110100000'</span>,
-  <span class="string">'111111111111111110100001'</span>,
-  <span class="string">'111111111111111110100010'</span>,
-  <span class="string">'111111111111111110100011'</span>,
-  <span class="string">'111111111111111110100100'</span>,
-  <span class="string">'111111111111111110100101'</span>,
-  <span class="string">'111111111111111110100110'</span>,
-  <span class="string">'111111111111111110100111'</span>,
-  <span class="string">'111111111111111110101000'</span>,
-  <span class="string">'111111111111111110101001'</span>,
-  <span class="string">'111111111111111110101010'</span>,
-  <span class="string">'111111111111111110101011'</span>,
-  <span class="string">'111111111111111110101100'</span>,
-  <span class="string">'111111111111111110101101'</span>,
-  <span class="string">'111111111111111110101110'</span>,
-  <span class="string">'111111111111111110101111'</span>,
-  <span class="string">'111111111111111110110000'</span>,
-  <span class="string">'111111111111111110110001'</span>,
-  <span class="string">'111111111111111110110010'</span>,
-  <span class="string">'111111111111111110110011'</span>,
-  <span class="string">'111111111111111110110100'</span>,
-  <span class="string">'111111111111111110110101'</span>,
-  <span class="string">'111111111111111110110110'</span>,
-  <span class="string">'111111111111111110110111'</span>,
-  <span class="string">'111111111111111110111000'</span>,
-  <span class="string">'111111111111111110111001'</span>,
-  <span class="string">'111111111111111110111010'</span>,
-  <span class="string">'111111111111111110111011'</span>,
-  <span class="string">'111111111111111110111100'</span>,
-  <span class="string">'111111111111111110111101'</span>,
-  <span class="string">'111111111111111110111110'</span>,
-  <span class="string">'111111111111111110111111'</span>,
-  <span class="string">'111111111111111111000000'</span>,
-  <span class="string">'111111111111111111000001'</span>,
-  <span class="string">'111111111111111111000010'</span>,
-  <span class="string">'111111111111111111000011'</span>,
-  <span class="string">'111111111111111111000100'</span>,
-  <span class="string">'111111111111111111000101'</span>,
-  <span class="string">'111111111111111111000110'</span>,
-  <span class="string">'111111111111111111000111'</span>,
-  <span class="string">'111111111111111111001000'</span>,
-  <span class="string">'111111111111111111001001'</span>,
-  <span class="string">'111111111111111111001010'</span>,
-  <span class="string">'111111111111111111001011'</span>,
-  <span class="string">'111111111111111111001100'</span>,
-  <span class="string">'111111111111111111001101'</span>,
-  <span class="string">'111111111111111111001110'</span>,
-  <span class="string">'111111111111111111001111'</span>,
-  <span class="string">'111111111111111111010000'</span>,
-  <span class="string">'111111111111111111010001'</span>,
-  <span class="string">'111111111111111111010010'</span>,
-  <span class="string">'111111111111111111010011'</span>,
-  <span class="string">'111111111111111111010100'</span>,
-  <span class="string">'111111111111111111010101'</span>,
-  <span class="string">'111111111111111111010110'</span>,
-  <span class="string">'111111111111111111010111'</span>,
-  <span class="string">'111111111111111111011000'</span>,
-  <span class="string">'111111111111111111011001'</span>,
-  <span class="string">'111111111111111111011010'</span>,
-  <span class="string">'111111111111111111011011'</span>,
-  <span class="string">'111111111111111111011100'</span>,
-  <span class="string">'111111111111111111011101'</span>
 ]);</pre></div></div>
             
         </li>
         
         
-        <li id="section-33">
+        <li id="section-34">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
+                <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
               <h3 id="string-literal-representation">String literal representation</h3>
 <p>Literal <strong>strings</strong> can represent header names or header values. There&#39;s two variant of the
@@ -1709,10 +1467,10 @@ string encoding:</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>HeaderSetCompressor.string = <span class="function"><span class="keyword">function</span> <span class="title">writeString</span><span class="params">(str, huffmanTable)</span> {</span>
+            <div class="content"><div class='highlight'><pre>HeaderSetCompressor.string = <span class="function"><span class="keyword">function</span> <span class="title">writeString</span><span class="params">(str)</span> {</span>
   str = <span class="keyword">new</span> Buffer(str, <span class="string">'utf8'</span>);
 
-  <span class="keyword">var</span> huffman = huffmanTable.encode(str);
+  <span class="keyword">var</span> huffman = HuffmanTable.huffmanTable.encode(str);
   <span class="keyword">if</span> (huffman.length &lt; str.length) {
     <span class="keyword">var</span> length = HeaderSetCompressor.integer(huffman.length, <span class="number">7</span>)
     length[<span class="number">0</span>][<span class="number">0</span>] |= <span class="number">128</span>;
@@ -1725,22 +1483,22 @@ string encoding:</p>
   }
 };
 
-HeaderSetDecompressor.string = <span class="function"><span class="keyword">function</span> <span class="title">readString</span><span class="params">(buffer, huffmanTable)</span> {</span>
+HeaderSetDecompressor.string = <span class="function"><span class="keyword">function</span> <span class="title">readString</span><span class="params">(buffer)</span> {</span>
   <span class="keyword">var</span> huffman = buffer[buffer.cursor] &amp; <span class="number">128</span>;
   <span class="keyword">var</span> length = HeaderSetDecompressor.integer(buffer, <span class="number">7</span>);
   <span class="keyword">var</span> encoded = buffer.slice(buffer.cursor, buffer.cursor + length);
   buffer.cursor += length;
-  <span class="keyword">return</span> (huffman ? huffmanTable.decode(encoded) : encoded).toString(<span class="string">'utf8'</span>);
+  <span class="keyword">return</span> (huffman ? HuffmanTable.huffmanTable.decode(encoded) : encoded).toString(<span class="string">'utf8'</span>);
 };</pre></div></div>
             
         </li>
         
         
-        <li id="section-34">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
               <h3 id="header-represenations">Header represenations</h3>
 <p>The JavaScript object representation is described near the
@@ -1811,7 +1569,7 @@ always represented as a string.</p>
   literalIncremental  : { prefix: <span class="number">6</span>, pattern: <span class="number">0x00</span> }
 };
 
-HeaderSetCompressor.header = <span class="function"><span class="keyword">function</span> <span class="title">writeHeader</span><span class="params">(header, huffmanTable)</span> {</span>
+HeaderSetCompressor.header = <span class="function"><span class="keyword">function</span> <span class="title">writeHeader</span><span class="params">(header)</span> {</span>
   <span class="keyword">var</span> representation, buffers = [];
 
   <span class="keyword">if</span> (<span class="keyword">typeof</span> header.value === <span class="string">'number'</span>) {
@@ -1824,6 +1582,13 @@ HeaderSetCompressor.header = <span class="function"><span class="keyword">functi
 
   <span class="keyword">if</span> (representation === representations.indexed) {
     buffers.push(HeaderSetCompressor.integer(header.value + <span class="number">1</span>, representation.prefix));
+    <span class="keyword">if</span> (header.value == -<span class="number">1</span>) {
+      <span class="keyword">if</span> (header.index) {
+        buffers.push(HeaderSetCompressor.integer(<span class="number">0x80</span>, <span class="number">8</span>));
+      } <span class="keyword">else</span> {
+        buffers.push(HeaderSetCompressor.integer(header.name, <span class="number">7</span>));
+      }
+    }
   }
 
   <span class="keyword">else</span> {
@@ -1831,9 +1596,9 @@ HeaderSetCompressor.header = <span class="function"><span class="keyword">functi
       buffers.push(HeaderSetCompressor.integer(header.name + <span class="number">1</span>, representation.prefix));
     } <span class="keyword">else</span> {
       buffers.push(HeaderSetCompressor.integer(<span class="number">0</span>, representation.prefix));
-      buffers.push(HeaderSetCompressor.string(header.name, huffmanTable));
+      buffers.push(HeaderSetCompressor.string(header.name));
     }
-    buffers.push(HeaderSetCompressor.string(header.value, huffmanTable));
+    buffers.push(HeaderSetCompressor.string(header.value));
   }
 
   buffers[<span class="number">0</span>][<span class="number">0</span>][<span class="number">0</span>] |= representation.pattern;
@@ -1841,7 +1606,7 @@ HeaderSetCompressor.header = <span class="function"><span class="keyword">functi
   <span class="keyword">return</span> Array.prototype.concat.apply([], buffers); <span class="comment">// array of arrays of buffers -&gt; array of buffers</span>
 };
 
-HeaderSetDecompressor.header = <span class="function"><span class="keyword">function</span> <span class="title">readHeader</span><span class="params">(buffer, huffmanTable)</span> {</span>
+HeaderSetDecompressor.header = <span class="function"><span class="keyword">function</span> <span class="title">readHeader</span><span class="params">(buffer)</span> {</span>
   <span class="keyword">var</span> representation, header = {};
 
   <span class="keyword">var</span> firstByte = buffer[buffer.cursor];
@@ -1856,14 +1621,22 @@ HeaderSetDecompressor.header = <span class="function"><span class="keyword">func
   <span class="keyword">if</span> (representation === representations.indexed) {
     header.value = header.name = HeaderSetDecompressor.integer(buffer, representation.prefix) - <span class="number">1</span>;
     header.index = <span class="literal">false</span>;
+    <span class="keyword">if</span> (header.value === -<span class="number">1</span>) {
+      <span class="keyword">if</span> (buffer[buffer.cursor] &amp; <span class="number">0x80</span>) {
+        header.index = <span class="literal">true</span>;
+        buffer.cursor += <span class="number">1</span>;
+      } <span class="keyword">else</span> {
+        header.name = HeaderSetDecompressor.integer(buffer, <span class="number">7</span>);
+      }
+    }
   }
 
   <span class="keyword">else</span> {
     header.name = HeaderSetDecompressor.integer(buffer, representation.prefix) - <span class="number">1</span>;
     <span class="keyword">if</span> (header.name === -<span class="number">1</span>) {
-      header.name = HeaderSetDecompressor.string(buffer, huffmanTable);
+      header.name = HeaderSetDecompressor.string(buffer);
     }
-    header.value = HeaderSetDecompressor.string(buffer, huffmanTable);
+    header.value = HeaderSetDecompressor.string(buffer);
     header.index = (representation === representations.literalIncremental);
   }
 
@@ -1873,11 +1646,11 @@ HeaderSetDecompressor.header = <span class="function"><span class="keyword">func
         </li>
         
         
-        <li id="section-35">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <h1 id="integration-with-http-2">Integration with HTTP/2</h1>
 
@@ -1886,11 +1659,11 @@ HeaderSetDecompressor.header = <span class="function"><span class="keyword">func
         </li>
         
         
-        <li id="section-36">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
               <p>This section describes the interaction between the compressor/decompressor and the rest of the
 HTTP/2 implementation. The <code>Compressor</code> and the <code>Decompressor</code> makes up a layer between the
@@ -1916,11 +1689,11 @@ these two representations:</p>
         </li>
         
         
-        <li id="section-37">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
               <h2 id="the-compressor-class">The Compressor class</h2>
 
@@ -1929,11 +1702,11 @@ these two representations:</p>
         </li>
         
         
-        <li id="section-38">
+        <li id="section-39">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-38">&#182;</a>
+                <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
               <p>The Compressor transform stream is basically stateless.</p>
 
@@ -1946,19 +1719,17 @@ these two representations:</p>
   <span class="keyword">this</span>._log = log.child({ component: <span class="string">'compressor'</span> });
 
   assert((type === <span class="string">'REQUEST'</span>) || (type === <span class="string">'RESPONSE'</span>));
-  <span class="keyword">this</span>._huffmanTable = (type === <span class="string">'REQUEST'</span>) ? HuffmanTable.requestHuffmanTable
-                                            : HuffmanTable.responseHuffmanTable;
   <span class="keyword">this</span>._table = <span class="keyword">new</span> HeaderTable(<span class="keyword">this</span>._log);
 }</pre></div></div>
             
         </li>
         
         
-        <li id="section-39">
+        <li id="section-40">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-39">&#182;</a>
+                <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
               <p>Changing the header table size</p>
 
@@ -1971,11 +1742,11 @@ these two representations:</p>
         </li>
         
         
-        <li id="section-40">
+        <li id="section-41">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-40">&#182;</a>
+                <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
               <p><code>compress</code> takes a header set, and compresses it using a new <code>HeaderSetCompressor</code> stream
 instance. This means that from now on, the advantages of streaming header encoding are lost,
@@ -1984,7 +1755,7 @@ but the API becomes simpler.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>Compressor.prototype.compress = <span class="function"><span class="keyword">function</span> <span class="title">compress</span><span class="params">(headers)</span> {</span>
-  <span class="keyword">var</span> compressor = <span class="keyword">new</span> HeaderSetCompressor(<span class="keyword">this</span>._log, <span class="keyword">this</span>._table, <span class="keyword">this</span>._huffmanTable);
+  <span class="keyword">var</span> compressor = <span class="keyword">new</span> HeaderSetCompressor(<span class="keyword">this</span>._log, <span class="keyword">this</span>._table);
   <span class="keyword">for</span> (<span class="keyword">var</span> name <span class="keyword">in</span> headers) {
     <span class="keyword">var</span> value = headers[name];
     name = String(name).toLowerCase();</pre></div></div>
@@ -1992,11 +1763,11 @@ but the API becomes simpler.</p>
         </li>
         
         
-        <li id="section-41">
+        <li id="section-42">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-41">&#182;</a>
+                <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
               <ul>
 <li>To allow for better compression efficiency, the Cookie header field MAY be split into
@@ -2017,11 +1788,11 @@ separate header fields, each with one or more cookie-pairs.</li>
         </li>
         
         
-        <li id="section-42">
+        <li id="section-43">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-42">&#182;</a>
+                <a class="pilcrow" href="#section-43">&#182;</a>
               </div>
               <ul>
 <li>To preserve the order of a comma-separated list, the ordered values for a single header
@@ -2058,11 +1829,11 @@ the ordering of that header field is known to be not significant.</li>
         </li>
         
         
-        <li id="section-43">
+        <li id="section-44">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-43">&#182;</a>
+                <a class="pilcrow" href="#section-44">&#182;</a>
               </div>
               <p>When a <code>frame</code> arrives</p>
 
@@ -2073,11 +1844,11 @@ the ordering of that header field is known to be not significant.</li>
         </li>
         
         
-        <li id="section-44">
+        <li id="section-45">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-44">&#182;</a>
+                <a class="pilcrow" href="#section-45">&#182;</a>
               </div>
               <ul>
 <li>and it is a HEADERS or PUSH_PROMISE frame<ul>
@@ -2123,11 +1894,11 @@ marks the last frame and the END_STREAM flag which is always false before the en
         </li>
         
         
-        <li id="section-45">
+        <li id="section-46">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-45">&#182;</a>
+                <a class="pilcrow" href="#section-46">&#182;</a>
               </div>
               <ul>
 <li>otherwise, the frame is forwarded without taking any action</li>
@@ -2145,11 +1916,11 @@ marks the last frame and the END_STREAM flag which is always false before the en
         </li>
         
         
-        <li id="section-46">
+        <li id="section-47">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-46">&#182;</a>
+                <a class="pilcrow" href="#section-47">&#182;</a>
               </div>
               <h2 id="the-decompressor-class">The Decompressor class</h2>
 
@@ -2158,11 +1929,11 @@ marks the last frame and the END_STREAM flag which is always false before the en
         </li>
         
         
-        <li id="section-47">
+        <li id="section-48">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-47">&#182;</a>
+                <a class="pilcrow" href="#section-48">&#182;</a>
               </div>
               <p>The Decompressor is a stateful transform stream, since it has to collect multiple frames first,
 and the decoding comes after unifying the payload of those frames.</p>
@@ -2179,8 +1950,6 @@ and <code>this._stream</code> respectively.</p>
   <span class="keyword">this</span>._log = log.child({ component: <span class="string">'compressor'</span> });
 
   assert((type === <span class="string">'REQUEST'</span>) || (type === <span class="string">'RESPONSE'</span>));
-  <span class="keyword">this</span>._huffmanTable = (type === <span class="string">'REQUEST'</span>) ? HuffmanTable.requestHuffmanTable
-                                            : HuffmanTable.responseHuffmanTable;
   <span class="keyword">this</span>._table = <span class="keyword">new</span> HeaderTable(<span class="keyword">this</span>._log);
 
   <span class="keyword">this</span>._inProgress = <span class="literal">false</span>;
@@ -2190,11 +1959,11 @@ and <code>this._stream</code> respectively.</p>
         </li>
         
         
-        <li id="section-48">
+        <li id="section-49">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-48">&#182;</a>
+                <a class="pilcrow" href="#section-49">&#182;</a>
               </div>
               <p>Changing the header table size</p>
 
@@ -2207,11 +1976,11 @@ and <code>this._stream</code> respectively.</p>
         </li>
         
         
-        <li id="section-49">
+        <li id="section-50">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-49">&#182;</a>
+                <a class="pilcrow" href="#section-50">&#182;</a>
               </div>
               <p><code>decompress</code> takes a full header block, and decompresses it using a new <code>HeaderSetDecompressor</code>
 stream instance. This means that from now on, the advantages of streaming header decoding are
@@ -2220,7 +1989,7 @@ lost, but the API becomes simpler.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>Decompressor.prototype.decompress = <span class="function"><span class="keyword">function</span> <span class="title">decompress</span><span class="params">(block)</span> {</span>
-  <span class="keyword">var</span> decompressor = <span class="keyword">new</span> HeaderSetDecompressor(<span class="keyword">this</span>._log, <span class="keyword">this</span>._table, <span class="keyword">this</span>._huffmanTable);
+  <span class="keyword">var</span> decompressor = <span class="keyword">new</span> HeaderSetDecompressor(<span class="keyword">this</span>._log, <span class="keyword">this</span>._table);
   decompressor.end(block);
 
   <span class="keyword">var</span> headers = {};
@@ -2231,11 +2000,11 @@ lost, but the API becomes simpler.</p>
         </li>
         
         
-        <li id="section-50">
+        <li id="section-51">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-50">&#182;</a>
+                <a class="pilcrow" href="#section-51">&#182;</a>
               </div>
               <ul>
 <li>After decompression, header fields that have values containing zero octets (0x0) MUST be
@@ -2262,11 +2031,11 @@ split into multiple header fields before being processed.</li>
         </li>
         
         
-        <li id="section-51">
+        <li id="section-52">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-51">&#182;</a>
+                <a class="pilcrow" href="#section-52">&#182;</a>
               </div>
               <ul>
 <li>If there are multiple Cookie header fields after decompression, these MUST be concatenated
@@ -2286,11 +2055,11 @@ string &quot;; &quot;).</li>
         </li>
         
         
-        <li id="section-52">
+        <li id="section-53">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-52">&#182;</a>
+                <a class="pilcrow" href="#section-53">&#182;</a>
               </div>
               <p>When a <code>frame</code> arrives</p>
 
@@ -2301,11 +2070,11 @@ string &quot;; &quot;).</li>
         </li>
         
         
-        <li id="section-53">
+        <li id="section-54">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-53">&#182;</a>
+                <a class="pilcrow" href="#section-54">&#182;</a>
               </div>
               <ul>
 <li>and the collection process is already <code>_inProgress</code>, the frame is simply stored, except if
@@ -2326,11 +2095,11 @@ it&#39;s an illegal frame</li>
         </li>
         
         
-        <li id="section-54">
+        <li id="section-55">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-54">&#182;</a>
+                <a class="pilcrow" href="#section-55">&#182;</a>
               </div>
               <ul>
 <li>and the collection process is not <code>_inProgress</code>, but the new frame&#39;s type is HEADERS or
@@ -2348,11 +2117,11 @@ PUSH_PROMISE, a new collection process begins</li>
         </li>
         
         
-        <li id="section-55">
+        <li id="section-56">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-55">&#182;</a>
+                <a class="pilcrow" href="#section-56">&#182;</a>
               </div>
               <ul>
 <li>otherwise, the frame is forwarded without taking any action</li>
@@ -2367,11 +2136,11 @@ PUSH_PROMISE, a new collection process begins</li>
         </li>
         
         
-        <li id="section-56">
+        <li id="section-57">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-56">&#182;</a>
+                <a class="pilcrow" href="#section-57">&#182;</a>
               </div>
               <ul>
 <li>When the frame signals that it&#39;s the last in the series, the header block chunks are
@@ -2402,11 +2171,11 @@ decompressed headers.</li>
         </li>
         
         
-        <li id="section-57">
+        <li id="section-58">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-57">&#182;</a>
+                <a class="pilcrow" href="#section-58">&#182;</a>
               </div>
               <h1 id="helper-functions">Helper functions</h1>
 
@@ -2415,11 +2184,11 @@ decompressed headers.</li>
         </li>
         
         
-        <li id="section-58">
+        <li id="section-59">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-58">&#182;</a>
+                <a class="pilcrow" href="#section-59">&#182;</a>
               </div>
               <p>Concatenate an array of buffers into a new buffer</p>
 
@@ -2442,11 +2211,11 @@ decompressed headers.</li>
         </li>
         
         
-        <li id="section-59">
+        <li id="section-60">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-59">&#182;</a>
+                <a class="pilcrow" href="#section-60">&#182;</a>
               </div>
               <p>Cut <code>buffer</code> into chunks not larger than <code>size</code></p>
 

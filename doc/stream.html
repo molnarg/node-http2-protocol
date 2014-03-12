@@ -769,7 +769,7 @@ Stream.prototype._finishing = <span class="function"><span class="keyword">funct
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
-              <h2 id="-stream-states-http-tools-ietf-org-html-draft-ietf-httpbis-http2-09-section-5-1-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-09#section-5.1">Stream States</a></h2>
+              <h2 id="-stream-states-http-tools-ietf-org-html-draft-ietf-httpbis-http2-10-section-5-1-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-10#section-5.1">Stream States</a></h2>
 
             </div>
             
@@ -874,7 +874,8 @@ allowed in the current state.</p>
             
             <div class="content"><div class='highlight'><pre>Stream.prototype._transition = <span class="function"><span class="keyword">function</span> <span class="title">transition</span><span class="params">(sending, frame)</span> {</span>
   <span class="keyword">var</span> receiving = !sending;
-  <span class="keyword">var</span> error = <span class="literal">undefined</span>;
+  <span class="keyword">var</span> connectionError;
+  <span class="keyword">var</span> streamError;
 
   <span class="keyword">var</span> DATA = <span class="literal">false</span>, HEADERS = <span class="literal">false</span>, PRIORITY = <span class="literal">false</span>;
   <span class="keyword">var</span> RST_STREAM = <span class="literal">false</span>, PUSH_PROMISE = <span class="literal">false</span>, WINDOW_UPDATE = <span class="literal">false</span>;
@@ -918,7 +919,7 @@ allowed in the current state.</p>
       } <span class="keyword">else</span> <span class="keyword">if</span> (sending &amp;&amp; RST_STREAM) {
         <span class="keyword">this</span>._setState(<span class="string">'CLOSED'</span>);
       } <span class="keyword">else</span> {
-        error = <span class="string">'PROTOCOL_ERROR'</span>;
+        connectionError = <span class="string">'PROTOCOL_ERROR'</span>;
       }
       <span class="keyword">break</span>;</pre></div></div>
             
@@ -952,7 +953,7 @@ releases the stream reservation.</li>
       } <span class="keyword">else</span> <span class="keyword">if</span> (receiving &amp;&amp; PRIORITY) {
         <span class="comment">/* No state change */</span>
       } <span class="keyword">else</span> {
-        error = <span class="string">'PROTOCOL_ERROR'</span>;
+        connectionError = <span class="string">'PROTOCOL_ERROR'</span>;
       }
       <span class="keyword">break</span>;</pre></div></div>
             
@@ -984,7 +985,7 @@ releases the stream reservation.</li>
       } <span class="keyword">else</span> <span class="keyword">if</span> (sending &amp;&amp; PRIORITY) {
         <span class="comment">/* No state change */</span>
       } <span class="keyword">else</span> {
-        error = <span class="string">'PROTOCOL_ERROR'</span>;
+        connectionError = <span class="string">'PROTOCOL_ERROR'</span>;
       }
       <span class="keyword">break</span>;</pre></div></div>
             
@@ -1045,7 +1046,7 @@ flag is received, or when either peer sends a RST_STREAM frame.</li>
       } <span class="keyword">else</span> <span class="keyword">if</span> (receiving || (sending &amp;&amp; (PRIORITY || WINDOW_UPDATE))) {
         <span class="comment">/* No state change */</span>
       } <span class="keyword">else</span> {
-        error = <span class="string">'PROTOCOL_ERROR'</span>;
+        connectionError = <span class="string">'PROTOCOL_ERROR'</span>;
       }
       <span class="keyword">break</span>;</pre></div></div>
             
@@ -1078,7 +1079,7 @@ END_STREAM flag, or when either peer sends a RST_STREAM frame.</li>
       } <span class="keyword">else</span> <span class="keyword">if</span> (sending || (receiving &amp;&amp; (WINDOW_UPDATE || PRIORITY))) {
         <span class="comment">/* No state change */</span>
       } <span class="keyword">else</span> {
-        error = <span class="string">'PROTOCOL_ERROR'</span>;
+        connectionError = <span class="string">'PROTOCOL_ERROR'</span>;
       }
       <span class="keyword">break</span>;</pre></div></div>
             
@@ -1121,7 +1122,7 @@ can be used to close any of those streams.</li>
            (<span class="keyword">this</span>._closedWithRst || WINDOW_UPDATE || PRIORITY || RST_STREAM))) {
         <span class="comment">/* No state change */</span>
       } <span class="keyword">else</span> {
-        error = <span class="string">'STREAM_CLOSED'</span>;
+        streamError = <span class="string">'STREAM_CLOSED'</span>;
       }
       <span class="keyword">break</span>;
   }</pre></div></div>
@@ -1165,7 +1166,7 @@ The state of the stream becomes &quot;reserved (remote)&quot;.</li>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">if</span> (PUSH_PROMISE &amp;&amp; !error) {
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">if</span> (PUSH_PROMISE &amp;&amp; !connectionError &amp;&amp; !streamError) {
     <span class="comment">/* This assertion must hold, because _transition is called immediately when a frame is written
        to the stream. If it would be called when a frame gets out of the input queue, the state
        of the reserved could have been changed by then. */</span>
@@ -1211,9 +1212,9 @@ The state of the stream becomes &quot;reserved (remote)&quot;.</li>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">if</span> (error) {
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">if</span> (connectionError || streamError) {
     <span class="keyword">var</span> info = {
-      error: error,
+      error: connectionError,
       frame: frame,
       state: <span class="keyword">this</span>.state,
       closedByUs: <span class="keyword">this</span>._closedByUs,
@@ -1250,6 +1251,8 @@ The state of the stream becomes &quot;reserved (remote)&quot;.</li>
                 <a class="pilcrow" href="#section-48">&#182;</a>
               </div>
               <ul>
+<li>In case of a serious problem, emitting and error and letting someone else handle it
+(e.g. closing the connection)</li>
 <li>When receiving something invalid, sending an RST_STREAM using the <code>reset</code> method.
 This will automatically cause a transition to the CLOSED state.</li>
 </ul>
@@ -1258,7 +1261,12 @@ This will automatically cause a transition to the CLOSED state.</li>
             
             <div class="content"><div class='highlight'><pre>    <span class="keyword">else</span> {
       <span class="keyword">this</span>._log.error(info, <span class="string">'Received illegal frame.'</span>);
-      <span class="keyword">this</span>.emit(<span class="string">'error'</span>, error);
+      <span class="keyword">if</span> (connectionError) {
+        <span class="keyword">this</span>.emit(<span class="string">'connectionError'</span>, connectionError);
+      } <span class="keyword">else</span> {
+        <span class="keyword">this</span>.reset(streamError);
+        <span class="keyword">this</span>.emit(<span class="string">'error'</span>, streamError)
+      }
     }
   }
 };</pre></div></div>
