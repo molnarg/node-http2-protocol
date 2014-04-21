@@ -468,7 +468,8 @@ broadcasts the message by creating an event on it.</p>
             
             <div class="content"><div class='highlight'><pre>Connection.prototype._writeControlFrame = <span class="function"><span class="keyword">function</span> <span class="title">_writeControlFrame</span><span class="params">(frame)</span> {</span>
   <span class="keyword">if</span> ((frame.type === <span class="string">'SETTINGS'</span>) || (frame.type === <span class="string">'PING'</span>) ||
-      (frame.type === <span class="string">'GOAWAY'</span>) || (frame.type === <span class="string">'WINDOW_UPDATE'</span>)) {
+      (frame.type === <span class="string">'GOAWAY'</span>) || (frame.type === <span class="string">'WINDOW_UPDATE'</span>) ||
+      (frame.type === <span class="string">'ALTSVC'</span>)) {
     <span class="keyword">this</span>._log.debug({ frame: frame }, <span class="string">'Receiving connection level frame'</span>);
     <span class="keyword">this</span>.emit(frame.type, frame);
   } <span class="keyword">else</span> {

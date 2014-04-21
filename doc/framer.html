@@ -345,7 +345,7 @@ will also run.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
-              <h2 id="-frame-header-http-tools-ietf-org-html-draft-ietf-httpbis-http2-10-section-4-1-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-10#section-4.1">Frame Header</a></h2>
+              <h2 id="-frame-header-http-tools-ietf-org-html-draft-ietf-httpbis-http2-11-section-4-1-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-11#section-4.1">Frame Header</a></h2>
 
             </div>
             
@@ -487,7 +487,7 @@ Deserializer.commonHeader = <span class="function"><span class="keyword">functio
 <li><code>typeSpecificAttributes</code>: a register of frame specific frame object attributes (used by
 logging code and also serves as documentation for frame objects)</li>
 </ul>
-<h2 id="-data-frames-http-tools-ietf-org-html-draft-ietf-httpbis-http2-10-section-6-1-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-10#section-6.1">DATA Frames</a></h2>
+<h2 id="-data-frames-http-tools-ietf-org-html-draft-ietf-httpbis-http2-11-section-6-1-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-11#section-6.1">DATA Frames</a></h2>
 
             </div>
             
@@ -511,9 +511,9 @@ identified stream.</li>
 Bit 2 being set indicates that this frame is the last for the current segment. Intermediaries
 MUST NOT coalesce frames across a segment boundary and MUST preserve segment boundaries when
 forwarding frames.</li>
-<li>PAD_LOW (0x10):
+<li>PAD_LOW (0x08):
 Bit 5 being set indicates that the Pad Low field is present.</li>
-<li>PAD_HIGH (0x20):
+<li>PAD_HIGH (0x10):
 Bit 6 being set indicates that the Pad High field is present. This bit MUST NOT be set unless
 the PAD_LOW flag is also set. Endpoints that receive a frame with PAD_HIGH set and PAD_LOW
 cleared MUST treat this as a connection error of type PROTOCOL_ERROR.</li>
@@ -523,7 +523,7 @@ cleared MUST treat this as a connection error of type PROTOCOL_ERROR.</li>
             
             <div class="content"><div class='highlight'><pre>frameTypes[<span class="number">0x0</span>] = <span class="string">'DATA'</span>;
 
-frameFlags.DATA = [<span class="string">'END_STREAM'</span>, <span class="string">'END_SEGMENT'</span>, <span class="string">'RESERVED4'</span>, <span class="string">'RESERVED8'</span>, <span class="string">'PAD_LOW'</span>, <span class="string">'PAD_HIGH'</span>];
+frameFlags.DATA = [<span class="string">'END_STREAM'</span>, <span class="string">'END_SEGMENT'</span>, <span class="string">'RESERVED4'</span>, <span class="string">'PAD_LOW'</span>, <span class="string">'PAD_HIGH'</span>];
 
 typeSpecificAttributes.DATA = [<span class="string">'data'</span>];
 
@@ -560,7 +560,7 @@ Deserializer.DATA = <span class="function"><span class="keyword">function</span>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
-              <h2 id="-headers-http-tools-ietf-org-html-draft-ietf-httpbis-http2-10-section-6-2-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-10#section-6.2">HEADERS</a></h2>
+              <h2 id="-headers-http-tools-ietf-org-html-draft-ietf-httpbis-http2-11-section-6-2-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-11#section-6.2">HEADERS</a></h2>
 
             </div>
             
@@ -586,12 +586,9 @@ forwarding frames.</li>
 <li>END_HEADERS (0x4):
 The END_HEADERS bit indicates that this frame contains the entire payload necessary to provide
 a complete set of headers.</li>
-<li>PRIORITY (0x8):
-Bit 4 being set indicates that the first four octets of this frame contain a single reserved
-bit and a 31-bit priority.</li>
-<li>PAD_LOW (0x10):
+<li>PAD_LOW (0x08):
 Bit 5 being set indicates that the Pad Low field is present.</li>
-<li>PAD_HIGH (0x20):
+<li>PAD_HIGH (0x10):
 Bit 6 being set indicates that the Pad High field is present. This bit MUST NOT be set unless
 the PAD_LOW flag is also set. Endpoints that receive a frame with PAD_HIGH set and PAD_LOW
 cleared MUST treat this as a connection error of type PROTOCOL_ERROR.</li>
@@ -601,9 +598,9 @@ cleared MUST treat this as a connection error of type PROTOCOL_ERROR.</li>
             
             <div class="content"><div class='highlight'><pre>frameTypes[<span class="number">0x1</span>] = <span class="string">'HEADERS'</span>;
 
-frameFlags.HEADERS = [<span class="string">'END_STREAM'</span>, <span class="string">'END_SEGMENT'</span>, <span class="string">'END_HEADERS'</span>, <span class="string">'PRIORITY'</span>, <span class="string">'PAD_LOW'</span>, <span class="string">'PAD_HIGH'</span>];
+frameFlags.HEADERS = [<span class="string">'END_STREAM'</span>, <span class="string">'END_SEGMENT'</span>, <span class="string">'END_HEADERS'</span>, <span class="string">'PAD_LOW'</span>, <span class="string">'PAD_HIGH'</span>, <span class="string">'PRIORITY_GROUP'</span>, <span class="string">'PRIORITY_DEPENDENCY'</span>];
 
-typeSpecificAttributes.HEADERS = [<span class="string">'priority'</span>, <span class="string">'headers'</span>, <span class="string">'data'</span>];</pre></div></div>
+typeSpecificAttributes.HEADERS = [<span class="string">'priorityGroup'</span>, <span class="string">'groupWeight'</span>, <span class="string">'priorityDependency'</span>, <span class="string">'exclusiveDependency'</span>, <span class="string">'headers'</span>, <span class="string">'data'</span>];</pre></div></div>
             
         </li>
         
@@ -617,19 +614,37 @@ typeSpecificAttributes.HEADERS = [<span class="string">'priority'</span>, <span 
               <pre><code> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|X|               (Optional) Priority (31)                      |
+| Pad High? (8) |  Pad Low? (8) |
++-+-------------+---------------+-------------------------------+
+|R|              Priority Group Identifier? (31)                |
++-+-------------+-----------------------------------------------+
+|  Weight? (8)  |
++-+-------------+-----------------------------------------------+
+|E|                 Stream Dependency? (31)                     |
 +-+-------------------------------------------------------------+
-|                    Header Block (*)                         ...
+|                   Header Block Fragment (*)                 ...
++---------------------------------------------------------------+
+|                           Padding (*)                       ...
 +---------------------------------------------------------------+</code></pre>
 <p>The payload of a HEADERS frame contains a Headers Block</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>Serializer.HEADERS = <span class="function"><span class="keyword">function</span> <span class="title">writeHeadersPriority</span><span class="params">(frame, buffers)</span> {</span>
-  <span class="keyword">if</span> (frame.flags.PRIORITY) {
+  <span class="keyword">if</span> (frame.flags.PRIORITY_GROUP) {
+    <span class="keyword">var</span> buffer = <span class="keyword">new</span> Buffer(<span class="number">5</span>);
+    assert((<span class="number">0</span> &lt;= frame.priorityGroup) &amp;&amp; (frame.priorityGroup &lt;= <span class="number">0x7fffffff</span>), frame.priorityGroup);
+    buffer.writeUInt32BE(frame.priorityGroup, <span class="number">0</span>);
+    assert((<span class="number">0</span> &lt;= frame.groupWeight) &amp;&amp; (frame.groupWeight &lt;= <span class="number">0xff</span>), frame.groupWeight);
+    buffer.writeUInt8(frame.groupWeight, <span class="number">4</span>);
+    buffers.push(buffer);
+  } <span class="keyword">else</span> <span class="keyword">if</span> (frame.flags.PRIORITY_DEPENDENCY) {
     <span class="keyword">var</span> buffer = <span class="keyword">new</span> Buffer(<span class="number">4</span>);
-    assert((<span class="number">0</span> &lt;= frame.priority) &amp;&amp; (frame.priority &lt;= <span class="number">0xffffffff</span>), frame.priority);
-    buffer.writeUInt32BE(frame.priority, <span class="number">0</span>);
+    assert((<span class="number">0</span> &lt;= frame.priorityDependency) &amp;&amp; (frame.priorityDependency &lt;= <span class="number">0x7fffffff</span>), frame.priorityDependency);
+    buffer.writeUInt32BE(frame.priorityDependency, <span class="number">0</span>);
+    <span class="keyword">if</span> (frame.exclusiveDependency) {
+      buffer[<span class="number">0</span>] |= <span class="number">0x80</span>;
+    }
     buffers.push(buffer);
   }
   buffers.push(frame.data);
@@ -648,10 +663,24 @@ Deserializer.HEADERS = <span class="function"><span class="keyword">function</sp
   } <span class="keyword">else</span> <span class="keyword">if</span> (frame.flags.PAD_HIGH) {
     <span class="keyword">return</span> <span class="string">'HEADERS frame got PAD_HIGH without PAD_LOW'</span>;
   }
-  <span class="keyword">if</span> (frame.flags.PRIORITY) {
-    frame.priority = buffer.readUInt32BE(dataOffset) &amp; <span class="number">0x7fffffff</span>;
+
+  <span class="keyword">if</span> (frame.flags.PRIORITY_GROUP) {
+    <span class="keyword">if</span> (frame.flags.PRIORITY_DEPENDENCY) {
+      <span class="keyword">return</span> <span class="string">'HEADERS frame got both PRIORITY_GROUP and PRIORITY_DEPENDENCY'</span>;
+    }
+    frame.priorityGroup = buffer.readUInt32BE(dataOffset) &amp; <span class="number">0x7fffffff</span>;
     dataOffset += <span class="number">4</span>;
+    frame.groupWeight = buffer.readUInt8(dataOffset);
+    dataOffset += <span class="number">1</span>;
+  } <span class="keyword">else</span> <span class="keyword">if</span> (frame.flags.PRIORITY_DEPENDENCY) {
+    <span class="keyword">var</span> dependencyData = <span class="keyword">new</span> Buffer(<span class="number">4</span>);
+    buffer.copy(dependencyData, <span class="number">0</span>, dataOffset, dataOffset + <span class="number">4</span>);
+    dataOffset += <span class="number">4</span>;
+    frame.exclusiveDependency = !!(dependencyData[<span class="number">0</span>] &amp; <span class="number">0x80</span>);
+    dependencyData[<span class="number">0</span>] &amp;= <span class="number">0x7f</span>;
+    frame.priorityDependency = dependencyData.readUInt32BE(<span class="number">0</span>);
   }
+
   <span class="keyword">if</span> (paddingLength) {
     frame.data = buffer.slice(dataOffset, -<span class="number">1</span> * paddingLength);
   } <span class="keyword">else</span> {
@@ -668,7 +697,7 @@ Deserializer.HEADERS = <span class="function"><span class="keyword">function</sp
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
-              <h2 id="-priority-http-tools-ietf-org-html-draft-ietf-httpbis-http2-10-section-6-3-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-10#section-6.3">PRIORITY</a></h2>
+              <h2 id="-priority-http-tools-ietf-org-html-draft-ietf-httpbis-http2-11-section-6-3-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-11#section-6.3">PRIORITY</a></h2>
 
             </div>
             
@@ -688,9 +717,9 @@ Deserializer.HEADERS = <span class="function"><span class="keyword">function</sp
             
             <div class="content"><div class='highlight'><pre>frameTypes[<span class="number">0x2</span>] = <span class="string">'PRIORITY'</span>;
 
-frameFlags.PRIORITY = [];
+frameFlags.PRIORITY = [<span class="string">'RESERVED1'</span>, <span class="string">'RESERVED2'</span>, <span class="string">'RESERVED4'</span>, <span class="string">'RESERVED8'</span>, <span class="string">'RESERVED16'</span>, <span class="string">'PRIORITY_GROUP'</span>, <span class="string">'PRIORITY_DEPENDENCY'</span>];
 
-typeSpecificAttributes.PRIORITY = [<span class="string">'priority'</span>];</pre></div></div>
+typeSpecificAttributes.PRIORITY = [<span class="string">'priorityGroup'</span>, <span class="string">'groupWeight'</span>, <span class="string">'priorityDependency'</span>, <span class="string">'exclusiveDependency'</span>];</pre></div></div>
             
         </li>
         
@@ -704,20 +733,57 @@ typeSpecificAttributes.PRIORITY = [<span class="string">'priority'</span>];</pre
               <pre><code> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|X|                   Priority (31)                             |
+|R|              Priority Group Identifier? (31)                |
++-+-------------+-----------------------------------------------+
+|  Weight? (8)  |
++-+-------------+-----------------------------------------------+
+|E|                 Stream Dependency? (31)                     |
 +-+-------------------------------------------------------------+</code></pre>
 <p>The payload of a PRIORITY frame contains a single reserved bit and a 31-bit priority.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>Serializer.PRIORITY = <span class="function"><span class="keyword">function</span> <span class="title">writePriority</span><span class="params">(frame, buffers)</span> {</span>
-  <span class="keyword">var</span> buffer = <span class="keyword">new</span> Buffer(<span class="number">4</span>);
-  buffer.writeUInt32BE(frame.priority, <span class="number">0</span>);
+  <span class="keyword">var</span> buffer;
+
+  assert((frame.flags.PRIORITY_GROUP || frame.flags.PRIORITY_DEPENDENCY) &amp;&amp;
+          !(frame.flags.PRIORITY_GROUP &amp;&amp; frame.flags.PRIORITY_DEPENDENCY),
+         frame.flags.PRIORITY_GROUP &amp;&amp; frame.flags.PRIORITY_DEPENDENCY);
+
+  <span class="keyword">if</span> (frame.flags.PRIORITY_GROUP) {
+    buffer = <span class="keyword">new</span> Buffer(<span class="number">5</span>);
+    assert((<span class="number">0</span> &lt;= frame.priorityGroup) &amp;&amp; (frame.priorityGroup &lt;= <span class="number">0x7fffffff</span>), frame.priorityGroup);
+    buffer.writeUInt32BE(frame.priorityGroup, <span class="number">0</span>);
+    assert((<span class="number">0</span> &lt;= frame.groupWeight) &amp;&amp; (frame.groupWeight &lt;= <span class="number">0xff</span>), frame.groupWeight);
+    buffer.writeUInt8(frame.groupWeight, <span class="number">4</span>);
+  } <span class="keyword">else</span> { <span class="comment">// frame.flags.PRIORITY_DEPENDENCY</span>
+    buffer = <span class="keyword">new</span> Buffer(<span class="number">4</span>);
+    assert((<span class="number">0</span> &lt;= frame.priorityDependency) &amp;&amp; (frame.priorityDependency &lt;= <span class="number">0x7fffffff</span>), frame.priorityDependency);
+    buffer.writeUInt32BE(frame.priorityDependency, <span class="number">0</span>);
+    <span class="keyword">if</span> (frame.exclusiveDependency) {
+      buffer[<span class="number">0</span>] |= <span class="number">0x80</span>;
+    }
+  }
+
   buffers.push(buffer);
 };
 
 Deserializer.PRIORITY = <span class="function"><span class="keyword">function</span> <span class="title">readPriority</span><span class="params">(buffer, frame)</span> {</span>
-  frame.priority = buffer.readUInt32BE(<span class="number">0</span>);
+  <span class="keyword">if</span> (frame.flags.PRIORITY_GROUP) {
+    <span class="keyword">if</span> (frame.flags.PRIORITY_DEPENDENCY) {
+      <span class="keyword">return</span> <span class="string">'PRIORITY frame got both PRIORITY_GROUP and PRIORITY_DEPENDENCY'</span>;
+    }
+    frame.priorityGroup = buffer.readUInt32BE(<span class="number">0</span>) &amp; <span class="number">0x7fffffff</span>;
+    frame.groupWeight = buffer.readUInt8(<span class="number">4</span>);
+  } <span class="keyword">else</span> <span class="keyword">if</span> (frame.flags.PRIORITY_DEPENDENCY) {
+    <span class="keyword">var</span> dependencyData = <span class="keyword">new</span> Buffer(<span class="number">4</span>);
+    buffer.copy(dependencyData, <span class="number">0</span>, <span class="number">0</span>, <span class="number">4</span>);
+    frame.exclusiveDependency = !!(dependencyData[<span class="number">0</span>] &amp; <span class="number">0x80</span>);
+    dependencyData[<span class="number">0</span>] &amp;= <span class="number">0x7f</span>;
+    frame.priorityDependency = dependencyData.readUInt32BE(<span class="number">0</span>);
+  } <span class="keyword">else</span> {
+    <span class="keyword">return</span> <span class="string">'PRIORITY frame got neither PRIORITY_GROUP nor PRIORITY_DEPENDENCY'</span>;
+  }
 };</pre></div></div>
             
         </li>
@@ -729,7 +795,7 @@ Deserializer.PRIORITY = <span class="function"><span class="keyword">function</s
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
-              <h2 id="-rst_stream-http-tools-ietf-org-html-draft-ietf-httpbis-http2-10-section-6-4-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-10#section-6.4">RST_STREAM</a></h2>
+              <h2 id="-rst_stream-http-tools-ietf-org-html-draft-ietf-httpbis-http2-11-section-6-4-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-11#section-6.4">RST_STREAM</a></h2>
 
             </div>
             
@@ -793,7 +859,7 @@ Deserializer.RST_STREAM = <span class="function"><span class="keyword">function<
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
-              <h2 id="-settings-http-tools-ietf-org-html-draft-ietf-httpbis-http2-10-section-6-5-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-10#section-6.5">SETTINGS</a></h2>
+              <h2 id="-settings-http-tools-ietf-org-html-draft-ietf-httpbis-http2-11-section-6-5-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-11#section-6.5">SETTINGS</a></h2>
 
             </div>
             
@@ -1010,7 +1076,7 @@ indicates the sender&#39;s initial stream window size (in bytes) for new streams
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
-              <h2 id="-push_promise-http-tools-ietf-org-html-draft-ietf-httpbis-http2-10-section-6-6-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-10#section-6.6">PUSH_PROMISE</a></h2>
+              <h2 id="-push_promise-http-tools-ietf-org-html-draft-ietf-httpbis-http2-11-section-6-6-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-11#section-6.6">PUSH_PROMISE</a></h2>
 
             </div>
             
@@ -1036,7 +1102,7 @@ provide a complete set of headers.</li>
             
             <div class="content"><div class='highlight'><pre>frameTypes[<span class="number">0x5</span>] = <span class="string">'PUSH_PROMISE'</span>;
 
-frameFlags.PUSH_PROMISE = [<span class="string">'RESERVED1'</span>, <span class="string">'RESERVED2'</span>, <span class="string">'END_PUSH_PROMISE'</span>];
+frameFlags.PUSH_PROMISE = [<span class="string">'RESERVED1'</span>, <span class="string">'RESERVED2'</span>, <span class="string">'END_PUSH_PROMISE'</span>, <span class="string">'PAD_LOW'</span>, <span class="string">'PAD_HIGH'</span>];
 
 typeSpecificAttributes.PUSH_PROMISE = [<span class="string">'promised_stream'</span>, <span class="string">'headers'</span>, <span class="string">'data'</span>];</pre></div></div>
             
@@ -1074,8 +1140,25 @@ additional context for the stream.</p>
 };
 
 Deserializer.PUSH_PROMISE = <span class="function"><span class="keyword">function</span> <span class="title">readPushPromise</span><span class="params">(buffer, frame)</span> {</span>
-  frame.promised_stream = buffer.readUInt32BE(<span class="number">0</span>) &amp; <span class="number">0x7fffffff</span>;
-  frame.data = buffer.slice(<span class="number">4</span>);
+  <span class="keyword">var</span> dataOffset = <span class="number">0</span>;
+  <span class="keyword">var</span> paddingLength = <span class="number">0</span>;
+  <span class="keyword">if</span> (frame.flags.PAD_LOW) {
+    <span class="keyword">if</span> (frame.flags.PAD_HIGH) {
+      paddingLength = (buffer.readUInt8(dataOffset) &amp; <span class="number">0xff</span>) * <span class="number">256</span>;
+      dataOffset += <span class="number">1</span>;
+    }
+    paddingLength += (buffer.readUInt8(dataOffset) &amp; <span class="number">0xff</span>);
+    dataOffset += <span class="number">1</span>;
+  } <span class="keyword">else</span> <span class="keyword">if</span> (frame.flags.PAD_HIGH) {
+    <span class="keyword">return</span> <span class="string">'PUSH_PROMISE frame got PAD_HIGH without PAD_LOW'</span>;
+  }
+  frame.promised_stream = buffer.readUInt32BE(dataOffset) &amp; <span class="number">0x7fffffff</span>;
+  dataOffset += <span class="number">4</span>;
+  <span class="keyword">if</span> (paddingLength) {
+    frame.data = buffer.slice(dataOffset, -<span class="number">1</span> * paddingLength);
+  } <span class="keyword">else</span> {
+    frame.data = buffer.slice(dataOffset);
+  }
 };</pre></div></div>
             
         </li>
@@ -1087,7 +1170,7 @@ Deserializer.PUSH_PROMISE = <span class="function"><span class="keyword">functio
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
-              <h2 id="-ping-http-tools-ietf-org-html-draft-ietf-httpbis-http2-10-section-6-7-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-10#section-6.7">PING</a></h2>
+              <h2 id="-ping-http-tools-ietf-org-html-draft-ietf-httpbis-http2-11-section-6-7-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-11#section-6.7">PING</a></h2>
 
             </div>
             
@@ -1149,7 +1232,7 @@ Deserializer.PING = <span class="function"><span class="keyword">function</span>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
-              <h2 id="-goaway-http-tools-ietf-org-html-draft-ietf-httpbis-http2-10-section-6-8-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-10#section-6.8">GOAWAY</a></h2>
+              <h2 id="-goaway-http-tools-ietf-org-html-draft-ietf-httpbis-http2-11-section-6-8-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-11#section-6.8">GOAWAY</a></h2>
 
             </div>
             
@@ -1225,7 +1308,7 @@ Deserializer.GOAWAY = <span class="function"><span class="keyword">function</spa
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-44">&#182;</a>
               </div>
-              <h2 id="-window_update-http-tools-ietf-org-html-draft-ietf-httpbis-http2-10-section-6-9-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-10#section-6.9">WINDOW_UPDATE</a></h2>
+              <h2 id="-window_update-http-tools-ietf-org-html-draft-ietf-httpbis-http2-11-section-6-9-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-11#section-6.9">WINDOW_UPDATE</a></h2>
 
             </div>
             
@@ -1291,7 +1374,7 @@ Deserializer.WINDOW_UPDATE = <span class="function"><span class="keyword">functi
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-47">&#182;</a>
               </div>
-              <h2 id="-continuation-http-tools-ietf-org-html-draft-ietf-httpbis-http2-10-section-6-10-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-10#section-6.10">CONTINUATION</a></h2>
+              <h2 id="-continuation-http-tools-ietf-org-html-draft-ietf-httpbis-http2-11-section-6-10-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-11#section-6.10">CONTINUATION</a></h2>
 
             </div>
             
@@ -1304,15 +1387,15 @@ Deserializer.WINDOW_UPDATE = <span class="function"><span class="keyword">functi
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-48">&#182;</a>
               </div>
-              <p>The CONTINUATION frame (type=0xA) is used to continue a sequence of header block fragments.</p>
+              <p>The CONTINUATION frame (type=0x9) is used to continue a sequence of header block fragments.</p>
 <p>The CONTINUATION frame defines the following flag:</p>
 <ul>
 <li>END_HEADERS (0x4):
 The END_HEADERS bit indicates that this frame ends the sequence of header block fragments
 necessary to provide a complete set of headers.</li>
-<li>PAD_LOW (0x10):
+<li>PAD_LOW (0x08):
 Bit 5 being set indicates that the Pad Low field is present.</li>
-<li>PAD_HIGH (0x20):
+<li>PAD_HIGH (0x10):
 Bit 6 being set indicates that the Pad High field is present. This bit MUST NOT be set unless
 the PAD_LOW flag is also set. Endpoints that receive a frame with PAD_HIGH set and PAD_LOW
 cleared MUST treat this as a connection error of type PROTOCOL_ERROR.</li>
@@ -1322,7 +1405,7 @@ cleared MUST treat this as a connection error of type PROTOCOL_ERROR.</li>
             
             <div class="content"><div class='highlight'><pre>frameTypes[<span class="number">0x9</span>] = <span class="string">'CONTINUATION'</span>;
 
-frameFlags.CONTINUATION = [<span class="string">'RESERVED1'</span>, <span class="string">'RESERVED2'</span>, <span class="string">'END_HEADERS'</span>, <span class="string">'RESERVED8'</span>, <span class="string">'PAD_LOW'</span>, <span class="string">'PAD_HIGH'</span>];
+frameFlags.CONTINUATION = [<span class="string">'RESERVED1'</span>, <span class="string">'RESERVED2'</span>, <span class="string">'END_HEADERS'</span>, <span class="string">'PAD_LOW'</span>, <span class="string">'PAD_HIGH'</span>];
 
 typeSpecificAttributes.CONTINUATION = [<span class="string">'headers'</span>, <span class="string">'data'</span>];
 
@@ -1359,7 +1442,7 @@ Deserializer.CONTINUATION = <span class="function"><span class="keyword">functio
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-49">&#182;</a>
               </div>
-              <h2 id="-error-codes-http-tools-ietf-org-html-draft-ietf-httpbis-http2-10-section-7-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-10#section-7">Error Codes</a></h2>
+              <h2 id="-altsvc-http-tools-ietf-org-html-draft-ietf-httpbis-http2-11-section-6-11-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-11#section-6.11">ALTSVC</a></h2>
 
             </div>
             
@@ -1371,6 +1454,117 @@ Deserializer.CONTINUATION = <span class="function"><span class="keyword">functio
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-50">&#182;</a>
+              </div>
+              <p>The ALTSVC frame (type=0xA) advertises the availability of an alternative service to the client.</p>
+<p>The ALTSVC frame does not define any flags.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>frameTypes[<span class="number">0xA</span>] = <span class="string">'ALTSVC'</span>;
+
+frameFlags.ALTSVC = [];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-51">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-51">&#182;</a>
+              </div>
+              <pre><code>0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</code></pre>
+<p>   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                          Max-Age (32)                         |
+   +-------------------------------+----------------+--------------+
+   |            Port (16)          |  Reserved (8)  | PID_LEN (8)  |
+   +-------------------------------+----------------+--------------+
+   |                        Protocol-ID (<em>)                        |
+   +---------------+-----------------------------------------------+
+   | HOST_LEN (8)  |                   Host (</em>)                  ...
+   +---------------+-----------------------------------------------+
+   |                          Origin? (*)                        ...
+   +---------------------------------------------------------------+</p>
+<p>The ALTSVC frame contains the following fields:</p>
+<p>Max-Age: An unsigned, 32-bit integer indicating the freshness
+   lifetime of the alternative service association, as per <a href="http://tools.ietf.org/html/draft-ietf-httpbis-alt-svc-01">ALT-SVC</a>
+   section 2.2.</p>
+<p>Port: An unsigned, 16-bit integer indicating the port that the
+   alternative service is available upon.</p>
+<p>Reserved: For future use. Senders MUST set these bits to &#39;0&#39;, and
+   recipients MUST ignore them.</p>
+<p>PID_LEN: An unsigned, 8-bit integer indicating the length, in
+   octets, of the Protocol-ID field.</p>
+<p>Protocol-ID: A sequence of bytes (length determined by PID_LEN)
+   containing the ALPN protocol identifier of the alternative
+   service.</p>
+<p>HOST_LEN: An unsigned, 8-bit integer indicating the length, in
+   octets, of the Host field.</p>
+<p>Host: A sequence of characters (length determined by HOST_LEN)
+   containing an ASCII string indicating the host that the
+   alternative service is available upon. An internationalized
+   domain [IDNA] MUST be expressed using A-labels.</p>
+<p>Origin: An optional sequence of characters (length determined by
+   subtracting the length of all lpreceding fields from the frame
+   length) containing ASCII serialisation of an origin (<a href="http://tools.ietf.org/html/rfc6454">RFC6454</a>,
+   Section 6.2) that the alternate service is applicable to.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>typeSpecificAttributes.ALTSVC = [<span class="string">'maxAge'</span>, <span class="string">'port'</span>, <span class="string">'protocolID'</span>, <span class="string">'host'</span>,
+                                 <span class="string">'origin'</span>];
+
+Serializer.ALTSVC = <span class="function"><span class="keyword">function</span> <span class="title">writeAltSvc</span><span class="params">(frame, buffers)</span> {</span>
+  <span class="keyword">var</span> buffer = <span class="keyword">new</span> Buffer(<span class="number">8</span>);
+  buffer.writeUInt32BE(frame.maxAge, <span class="number">0</span>);
+  buffer.writeUInt16BE(frame.port, <span class="number">4</span>);
+  buffer.writeUInt8(<span class="number">0</span>, <span class="number">6</span>);
+  buffer.writeUInt8(frame.protocolID.length, <span class="number">7</span>);
+  buffers.push(buffer);
+
+  buffers.push(<span class="keyword">new</span> Buffer(frame.protocolID, <span class="string">'ascii'</span>));
+
+  buffer = <span class="keyword">new</span> Buffer(<span class="number">1</span>);
+  buffer.writeUInt8(frame.host.length, <span class="number">0</span>);
+  buffers.push(buffer);
+
+  buffers.push(<span class="keyword">new</span> Buffer(frame.host, <span class="string">'ascii'</span>));
+
+  buffers.push(<span class="keyword">new</span> Buffer(frame.origin, <span class="string">'ascii'</span>));
+};
+
+Deserializer.ALTSVC = <span class="function"><span class="keyword">function</span> <span class="title">readAltSvc</span><span class="params">(buffer, frame)</span> {</span>
+  frame.maxAge = buffer.readUInt32BE(<span class="number">0</span>);
+  frame.port = buffer.readUInt16BE(<span class="number">4</span>);
+  <span class="keyword">var</span> pidLength = buffer.readUInt8(<span class="number">7</span>);
+  frame.protocolID = buffer.toString(<span class="string">'ascii'</span>, <span class="number">8</span>, <span class="number">8</span> + pidLength);
+  <span class="keyword">var</span> hostLength = buffer.readUInt8(<span class="number">8</span> + pidLength);
+  frame.host = buffer.toString(<span class="string">'ascii'</span>, <span class="number">9</span> + pidLength, <span class="number">9</span> + pidLength + hostLength);
+  frame.origin = buffer.toString(<span class="string">'ascii'</span>, <span class="number">9</span> + pidLength + hostLength);
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-52">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-52">&#182;</a>
+              </div>
+              <h2 id="-error-codes-http-tools-ietf-org-html-draft-ietf-httpbis-http2-11-section-7-"><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-11#section-7">Error Codes</a></h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-53">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-53">&#182;</a>
               </div>
               
             </div>
@@ -1386,18 +1580,19 @@ Deserializer.CONTINUATION = <span class="function"><span class="keyword">functio
   <span class="string">'REFUSED_STREAM'</span>,
   <span class="string">'CANCEL'</span>,
   <span class="string">'COMPRESSION_ERROR'</span>,
-  <span class="string">'CONNECT_ERROR'</span>
-];
-errorCodes[<span class="number">420</span>] = <span class="string">'ENHANCE_YOUR_CALM'</span>;</pre></div></div>
+  <span class="string">'CONNECT_ERROR'</span>,
+  <span class="string">'ENHANCE_YOUR_CALM'</span>,
+  <span class="string">'INADEQUATE_SECURITY'</span>
+];</pre></div></div>
             
         </li>
         
         
-        <li id="section-51">
+        <li id="section-54">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-51">&#182;</a>
+                <a class="pilcrow" href="#section-54">&#182;</a>
               </div>
               <h2 id="logging">Logging</h2>
 
@@ -1406,11 +1601,11 @@ errorCodes[<span class="number">420</span>] = <span class="string">'ENHANCE_YOUR
         </li>
         
         
-        <li id="section-52">
+        <li id="section-55">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-52">&#182;</a>
+                <a class="pilcrow" href="#section-55">&#182;</a>
               </div>
               <p><a href="https://github.com/trentm/node-bunyan#serializers">Bunyan serializers</a> to improve logging output
 for debug messages emitted in this component.</p>
@@ -1422,11 +1617,11 @@ for debug messages emitted in this component.</p>
         </li>
         
         
-        <li id="section-53">
+        <li id="section-56">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-53">&#182;</a>
+                <a class="pilcrow" href="#section-56">&#182;</a>
               </div>
               <ul>
 <li><code>frame</code> serializer: it transforms data attributes from Buffers to hex strings and filters out
@@ -1479,11 +1674,11 @@ exports.serializers.frame = <span class="function"><span class="keyword">functio
         </li>
         
         
-        <li id="section-54">
+        <li id="section-57">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-54">&#182;</a>
+                <a class="pilcrow" href="#section-57">&#182;</a>
               </div>
               <ul>
 <li><code>data</code> serializer: it simply transforms a buffer to a hex string.</li>
