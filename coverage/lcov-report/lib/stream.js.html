@@ -183,16 +183,16 @@
     <h1>Code coverage report for <span class="entity">lib/stream.js</span></h1>
     <h2>
         
-        Statements: <span class="metric">89.81% <small>(194 / 216)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        Statements: <span class="metric">89.04% <small>(195 / 219)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
         
         
-        Branches: <span class="metric">84.34% <small>(140 / 166)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        Branches: <span class="metric">83.91% <small>(146 / 174)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
         
         
         Functions: <span class="metric">90.91% <small>(20 / 22)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
         
         
-        Lines: <span class="metric">89.95% <small>(188 / 209)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        Lines: <span class="metric">89.57% <small>(189 / 211)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
         
     </h2>
     <div class="path"><a href="../index.html">All files</a> &#187; <a href="index.html">lib/</a> &#187; stream.js</div>
@@ -825,7 +825,10 @@
 624
 625
 626
-627</td><td class="line-coverage"><span class="cline-any cline-yes">1</span>
+627
+628
+629
+630</td><td class="line-coverage"><span class="cline-any cline-yes">1</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1052,6 +1055,8 @@
 <span class="cline-any cline-yes">4</span>
 <span class="cline-any cline-yes">9</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">9</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">9</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1220,6 +1225,7 @@
 <span class="cline-any cline-yes">17</span>
 <span class="cline-any cline-yes">20</span>
 <span class="cline-any cline-yes">10</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1680,6 +1686,8 @@ Stream.prototype._writeUpstream = function _writeUpstream(frame) {
 <span class="cstat-no" title="statement not covered" >    this._onPriority(frame);</span>
   } else <span class="missing-if-branch" title="if path not taken"" >I</span>if (frame.type === 'ALTSVC') {
     // TODO
+  } else <span class="missing-if-branch" title="if path not taken"" >I</span>if (frame.type === 'BLOCKED') {
+    // TODO
   }
 &nbsp;
   // * If it's an invalid stream level frame, emit error
@@ -1777,7 +1785,7 @@ Stream.prototype._finishing = function _finishing() {
   }
 };
 &nbsp;
-// [Stream States](http://tools.ietf.org/html/draft-ietf-httpbis-http2-11#section-5.1)
+// [Stream States](http://tools.ietf.org/html/draft-ietf-httpbis-http2-12#section-5.1)
 // ----------------
 //
 //                           +--------+
@@ -1837,7 +1845,7 @@ Stream.prototype._transition = function transition(sending, frame) {
   var connectionError;
   var streamError;
 &nbsp;
-  var DATA = false, HEADERS = false, PRIORITY = false, ALTSVC = false;
+  var DATA = false, HEADERS = false, PRIORITY = false, ALTSVC = false, BLOCKED = false;
   var RST_STREAM = false, PUSH_PROMISE = false, WINDOW_UPDATE = false;
   switch(frame.type) {
     case 'DATA'         : DATA          = true; break;
@@ -1847,6 +1855,7 @@ Stream.prototype._transition = function transition(sending, frame) {
     case 'PUSH_PROMISE' : PUSH_PROMISE  = true; break;
     case 'WINDOW_UPDATE': WINDOW_UPDATE = true; break;
 <span class="branch-6 cbranch-no" title="branch not covered" >    case 'ALTSVC'       : <span class="cstat-no" title="statement not covered" >ALTSVC        = true; <span class="cstat-no" title="statement not covered" ></span>break;</span></span>
+<span class="branch-7 cbranch-no" title="branch not covered" >    case 'BLOCKED'      : <span class="cstat-no" title="statement not covered" >BLOCKED       = true; <span class="cstat-no" title="statement not covered" ></span>break;</span></span>
   }
 &nbsp;
   var previousState = this.state;
@@ -1904,7 +1913,7 @@ Stream.prototype._transition = function transition(sending, frame) {
         this._setState('CLOSED');
       } else if (receiving &amp;&amp; HEADERS) {
         this._setState('HALF_CLOSED_LOCAL');
-      } else <span class="missing-if-branch" title="if path not taken"" >I</span>if (sending &amp;&amp; PRIORITY) {
+      } else <span class="missing-if-branch" title="if path not taken"" >I</span>if (BLOCKED || (sending &amp;&amp; PRIORITY)) {
         /* No state change */
       } else {
         connectionError = 'PROTOCOL_ERROR';
@@ -1939,7 +1948,7 @@ Stream.prototype._transition = function transition(sending, frame) {
     case 'HALF_CLOSED_LOCAL':
       if (RST_STREAM || (receiving &amp;&amp; frame.flags.END_STREAM)) {
         this._setState('CLOSED');
-      } else if (receiving || (sending &amp;&amp; (PRIORITY || WINDOW_UPDATE))) {
+      } else if (BLOCKED || ALTSVC ||receiving || (sending &amp;&amp; (PRIORITY || WINDOW_UPDATE))) {
         /* No state change */
       } else {
         connectionError = 'PROTOCOL_ERROR';
@@ -1959,7 +1968,7 @@ Stream.prototype._transition = function transition(sending, frame) {
     case 'HALF_CLOSED_REMOTE':
       if (RST_STREAM || (sending &amp;&amp; frame.flags.END_STREAM)) {
         this._setState('CLOSED');
-      } else if (sending || (receiving &amp;&amp; (WINDOW_UPDATE || PRIORITY))) {
+      } else if (BLOCKED || ALTSVC ||sending || (receiving &amp;&amp; (WINDOW_UPDATE || PRIORITY))) {
         /* No state change */
       } else {
         connectionError = 'PROTOCOL_ERROR';
@@ -2082,7 +2091,7 @@ exports.serializers.s = function(stream) {
 
 </div>
 <div class="footer">
-    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Mon Apr 21 2014 13:50:17 GMT+0200 (CEST)</div>
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sat Apr 26 2014 13:38:26 GMT+0200 (CEST)</div>
 </div>
 
 <script src="../prettify.js"></script>

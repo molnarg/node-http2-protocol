@@ -135,7 +135,7 @@ exports.Flow = Flow;</pre></div></div>
 <li><p><strong>Event: &#39;error&#39; (type)</strong>: signals an error</p>
 </li>
 <li><p><strong>setInitialWindow(size)</strong>: the initial flow control window size can be changed <em>any time</em>
-(<a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-11#section-6.9.2">as described in the standard</a>) using this method</p>
+(<a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-12#section-6.9.2">as described in the standard</a>) using this method</p>
 </li>
 </ul>
 <h2 id="api-for-child-classes">API for child classes</h2>
@@ -217,6 +217,7 @@ control window size of 65535 bytes.</p>
   <span class="keyword">this</span>._queue = [];
   <span class="keyword">this</span>._ended = <span class="literal">false</span>;
   <span class="keyword">this</span>._received = <span class="number">0</span>;
+  <span class="keyword">this</span>._blocked = <span class="literal">false</span>;
 }
 Flow.prototype = Object.create(Duplex.prototype, { constructor: { value: Flow } });</pre></div></div>
             
@@ -300,7 +301,8 @@ incoming frame is a WINDOW_UPDATE.</p>
                 <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
               <p><code>_restoreWindow</code> basically acknowledges the DATA frames received since it&#39;s last call. It sends
-a WINDOW_UPDATE that restores the flow control window of the remote end.</p>
+a WINDOW_UPDATE that restores the flow control window of the remote end.
+TODO: push this directly into the output queue. No need to wait for DATA frames in the queue.</p>
 
             </div>
             
@@ -413,6 +415,7 @@ the extent it is possible with respect to the window size and output queue feedb
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">this</span>._window &gt; <span class="number">0</span>) {
+    <span class="keyword">this</span>._blocked = <span class="literal">false</span>;
     <span class="keyword">this</span>._readableState.sync = <span class="literal">true</span>; <span class="comment">// to avoid reentrant calls</span>
     <span class="keyword">do</span> {
       <span class="keyword">var</span> moreNeeded = <span class="keyword">this</span>._push(<span class="keyword">this</span>._queue[<span class="number">0</span>]);
@@ -442,8 +445,14 @@ the extent it is possible with respect to the window size and output queue feedb
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">else</span> {
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">else</span> <span class="keyword">if</span> (!<span class="keyword">this</span>._blocked) {
+    <span class="keyword">this</span>._parentPush({
+      type: <span class="string">'BLOCKED'</span>,
+      flags: {},
+      stream: <span class="keyword">this</span>._flowControlId
+    })
     <span class="keyword">this</span>.once(<span class="string">'window_update'</span>, <span class="keyword">this</span>._read);
+    <span class="keyword">this</span>._blocked = <span class="literal">true</span>;
   }
 };
 
