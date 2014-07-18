@@ -114,13 +114,15 @@ var test_frames = [{
       SETTINGS_HEADER_TABLE_SIZE: 0x12345678,
       SETTINGS_ENABLE_PUSH: true,
       SETTINGS_MAX_CONCURRENT_STREAMS: 0x01234567,
-      SETTINGS_INITIAL_WINDOW_SIZE:    0x89ABCDEF
+      SETTINGS_INITIAL_WINDOW_SIZE:    0x89ABCDEF,
+      SETTINGS_MAX_FRAME_SIZE:         0x00010000
     }
   },
-  buffer: new Buffer('000018' + '04' + '00' + '0000000A' +   '0001' + '12345678' +
+  buffer: new Buffer('00001E' + '04' + '00' + '0000000A' +   '0001' + '12345678' +
                                                              '0002' + '00000001' +
                                                              '0003' + '01234567' +
-                                                             '0004' + '89ABCDEF', 'hex')
+                                                             '0004' + '89ABCDEF' +
+                                                             '0005' + '00010000', 'hex')
 
 }, {
   frame: {
