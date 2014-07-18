@@ -4,6 +4,8 @@ node-http2-protocol
 An HTTP/2 ([draft-ietf-httpbis-http2-13](http://tools.ietf.org/html/draft-ietf-httpbis-http2-13))
 framing layer implementaion for node.js.
 
+![Travis CI status](https://travis-ci.org/molnarg/node-http2-protocol.svg?branch=master)
+
 Installation
 ------------
 
