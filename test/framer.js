@@ -21,7 +21,7 @@ var frame_types = {
 var test_frames = [{
   frame: {
     type: 'DATA',
-    flags: { END_STREAM: false, END_SEGMENT: false, RESERVED4: false,
+    flags: { END_STREAM: false, RESERVED2: false, RESERVED4: false,
              PADDED: false },
     stream: 10,
 
@@ -33,7 +33,7 @@ var test_frames = [{
 }, {
   frame: {
     type: 'HEADERS',
-    flags: { END_STREAM: false, END_SEGMENT: false, END_HEADERS: false,
+    flags: { END_STREAM: false, RESERVED2: false, END_HEADERS: false,
              PADDED: false, RESERVED5: false, PRIORITY: false },
     stream: 15,
 
@@ -44,7 +44,7 @@ var test_frames = [{
 }, {
   frame: {
     type: 'HEADERS',
-    flags: { END_STREAM: false, END_SEGMENT: false, END_HEADERS: false,
+    flags: { END_STREAM: false, RESERVED2: false, END_HEADERS: false,
              PADDED: false, RESERVED5: false, PRIORITY: true },
     stream: 15,
     priorityDependency: 10,
@@ -59,7 +59,7 @@ var test_frames = [{
 }, {
   frame: {
     type: 'HEADERS',
-    flags: { END_STREAM: false, END_SEGMENT: false, END_HEADERS: false,
+    flags: { END_STREAM: false, RESERVED2: false, END_HEADERS: false,
              PADDED: false, RESERVED5: false, PRIORITY: true },
     stream: 15,
     priorityDependency: 10,
@@ -216,7 +216,7 @@ var deserializer_test_frames = test_frames.slice(0);
 var padded_test_frames = [{
   frame: {
     type: 'DATA',
-    flags: { END_STREAM: false, END_SEGMENT: false, RESERVED4: false,
+    flags: { END_STREAM: false, RESERVED2: false, RESERVED4: false,
              PADDED: true },
     stream: 10,
     data: new Buffer('12345678', 'hex')
@@ -227,7 +227,7 @@ var padded_test_frames = [{
 }, {
   frame: {
     type: 'HEADERS',
-    flags: { END_STREAM: false, END_SEGMENT: false, END_HEADERS: false,
+    flags: { END_STREAM: false, RESERVED2: false, END_HEADERS: false,
              PADDED: true, RESERVED5: false, PRIORITY: false },
     stream: 15,
 
@@ -239,7 +239,7 @@ var padded_test_frames = [{
 }, {
   frame: {
     type: 'HEADERS',
-    flags: { END_STREAM: false, END_SEGMENT: false, END_HEADERS: false,
+    flags: { END_STREAM: false, RESERVED2: false, END_HEADERS: false,
              PADDED: true, RESERVED5: false, PRIORITY: true },
     stream: 15,
     priorityDependency: 10,
@@ -254,7 +254,7 @@ var padded_test_frames = [{
 }, {
   frame: {
     type: 'HEADERS',
-    flags: { END_STREAM: false, END_SEGMENT: false, END_HEADERS: false,
+    flags: { END_STREAM: false, RESERVED2: false, END_HEADERS: false,
              PADDED: true, RESERVED5: false, PRIORITY: true },
     stream: 15,
     priorityDependency: 10,
