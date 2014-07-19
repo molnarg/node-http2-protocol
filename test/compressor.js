@@ -83,7 +83,6 @@ var test_headers = [{
     index: true,
     mustNeverIndex: false,
     contextUpdate: false,
-    clearReferenceSet: false,
     newMaxSize: 0
   },
   buffer: new Buffer('42' + '03474554', 'hex')
@@ -95,7 +94,6 @@ var test_headers = [{
     index: true,
     mustNeverIndex: false,
     contextUpdate: false,
-    clearReferenceSet: false,
     newMaxSize: 0
   },
   buffer: new Buffer('47' + '839d29af', 'hex')
@@ -107,7 +105,6 @@ var test_headers = [{
     index: true,
     mustNeverIndex: false,
     contextUpdate: false,
-    clearReferenceSet: false,
     newMaxSize: 0
   },
   buffer: new Buffer('46' + '012F', 'hex')
@@ -119,10 +116,20 @@ var test_headers = [{
     index: true,
     mustNeverIndex: false,
     contextUpdate: false,
-    clearReferenceSet: false,
     newMaxSize: 0
   },
   buffer: new Buffer('44' + '89f1e3c2f29ceb90f4ff', 'hex')
+}, {
+  // indexed
+  header: {
+    name: 3,
+    value: 3,
+    index: false,
+    mustNeverIndex: false,
+    contextUpdate: false,
+    newMaxSize: 0
+  },
+  buffer: new Buffer('84', 'hex')
 }, {
   // literal w/index, name index
   header: {
@@ -131,10 +138,19 @@ var test_headers = [{
     index: true,
     mustNeverIndex: false,
     contextUpdate: false,
-    clearReferenceSet: false,
     newMaxSize: 0
   },
   buffer: new Buffer('43' + '849d29ad1f', 'hex')
+}, {
+  header: {
+    name: 2,
+    value: 2,
+    index: false,
+    mustNeverIndex: false,
+    contextUpdate: false,
+    newMaxSize: 0
+  },
+  buffer: new Buffer('83', 'hex')
 }, {
   // literal w/index, name index
   header: {
@@ -143,7 +159,6 @@ var test_headers = [{
     index: true,
     mustNeverIndex: false,
     contextUpdate: false,
-    clearReferenceSet: false,
     newMaxSize: 0
   },
   buffer: new Buffer('42' + '89f1e3c2f18ec5c87a7f', 'hex')
@@ -155,34 +170,31 @@ var test_headers = [{
     index: true,
     mustNeverIndex: false,
     contextUpdate: false,
-    clearReferenceSet: false,
     newMaxSize: 0
   },
   buffer: new Buffer('5e' + '86a8eb10649cbf', 'hex')
 }, {
-  // indexed
+  // index
   header: {
-    name: 3,
-    value: 3,
+    name: 6,
+    value: 6,
     index: false,
     mustNeverIndex: false,
     contextUpdate: false,
-    clearReferenceSet: false,
     newMaxSize: 0
   },
-  buffer: new Buffer('84', 'hex')
+  buffer: new Buffer('87', 'hex')
 }, {
-  // indexed
+  // index
   header: {
-    name: 5,
-    value: 5,
+    name: 2,
+    value: 2,
     index: false,
     mustNeverIndex: false,
     contextUpdate: false,
-    clearReferenceSet: false,
     newMaxSize: 0
   },
-  buffer: new Buffer('86', 'hex')
+  buffer: new Buffer('83', 'hex')
 }, {
   // literal w/index, name index
   header: {
@@ -191,10 +203,20 @@ var test_headers = [{
     index: true,
     mustNeverIndex: false,
     contextUpdate: false,
-    clearReferenceSet: false,
     newMaxSize: 0
   },
   buffer: new Buffer('45' + '8b6096a127a56ac699d72211', 'hex')
+}, {
+  // index
+  header: {
+    name: 2,
+    value: 2,
+    index: false,
+    mustNeverIndex: false,
+    contextUpdate: false,
+    newMaxSize: 0
+  },
+  buffer: new Buffer('83', 'hex')
 }, {
   // literal w/index, new name & value
   header: {
@@ -203,34 +225,75 @@ var test_headers = [{
     index: true,
     mustNeverIndex: false,
     contextUpdate: false,
-    clearReferenceSet: false,
     newMaxSize: 0
   },
   buffer: new Buffer('40' + '8825a849e95ba97d7f' + '8925a849e95bb8e8b4bf', 'hex')
 }, {
-  // indexed
+  // index
   header: {
-    name: 2,
-    value: 2,
+    name: 8,
+    value: 8,
     index: false,
     mustNeverIndex: false,
     contextUpdate: false,
-    clearReferenceSet: false,
     newMaxSize: 0
   },
-  buffer: new Buffer('83', 'hex')
+  buffer: new Buffer('89', 'hex')
 }, {
-  // indexed
+  // index
   header: {
-    name: 6,
-    value: 6,
+    name: 4,
+    value: 4,
     index: false,
     mustNeverIndex: false,
     contextUpdate: false,
-    clearReferenceSet: false,
     newMaxSize: 0
   },
-  buffer: new Buffer('87', 'hex')
+  buffer: new Buffer('85', 'hex')
+}, {
+  // index
+  header: {
+    name: 1,
+    value: 1,
+    index: false,
+    mustNeverIndex: false,
+    contextUpdate: false,
+    newMaxSize: 0
+  },
+  buffer: new Buffer('82', 'hex')
+}, {
+  // index
+  header: {
+    name: 5,
+    value: 5,
+    index: false,
+    mustNeverIndex: false,
+    contextUpdate: false,
+    newMaxSize: 0
+  },
+  buffer: new Buffer('86', 'hex')
+}, {
+  // index
+  header: {
+    name: 3,
+    value: 3,
+    index: false,
+    mustNeverIndex: false,
+    contextUpdate: false,
+    newMaxSize: 0
+  },
+  buffer: new Buffer('84', 'hex')
+}, {
+  // index
+  header: {
+    name: 0,
+    value: 0,
+    index: false,
+    mustNeverIndex: false,
+    contextUpdate: false,
+    newMaxSize: 0
+  },
+  buffer: new Buffer('81', 'hex')
 }, {
   // Literal w/o index, name index
   header: {
@@ -239,7 +302,6 @@ var test_headers = [{
     index: false,
     mustNeverIndex: false,
     contextUpdate: false,
-    clearReferenceSet: false,
     newMaxSize: 0
   },
   buffer: new Buffer('07' + '86f138d25ee5b3', 'hex')
@@ -251,7 +313,6 @@ var test_headers = [{
     index: false,
     mustNeverIndex: false,
     contextUpdate: false,
-    clearReferenceSet: false,
     newMaxSize: 0
   },
   buffer: new Buffer('00' + '8294e7' + '03626172', 'hex')
@@ -263,7 +324,6 @@ var test_headers = [{
     index: false,
     mustNeverIndex: true,
     contextUpdate: false,
-    clearReferenceSet: false,
     newMaxSize: 0
   },
   buffer: new Buffer('17' + '86f138d25ee5b3', 'hex')
@@ -275,7 +335,6 @@ var test_headers = [{
     index: false,
     mustNeverIndex: true,
     contextUpdate: false,
-    clearReferenceSet: false,
     newMaxSize: 0
   },
   buffer: new Buffer('10' + '8294e7' + '03626172', 'hex')
@@ -286,21 +345,9 @@ var test_headers = [{
     index: false,
     mustNeverIndex: false,
     contextUpdate: true,
-    clearReferenceSet: true,
-    newMaxSize: 0
-  },
-  buffer: new Buffer('30', 'hex')
-}, {
-  header: {
-    name: -1,
-    value: -1,
-    index: false,
-    mustNeverIndex: false,
-    contextUpdate: true,
-    clearReferenceSet: false,
     newMaxSize: 100
   },
-  buffer: new Buffer('2F55', 'hex')
+  buffer: new Buffer('3F45', 'hex')
 }];
 
 var test_header_sets = [{
@@ -328,7 +375,7 @@ var test_header_sets = [{
     ':authority': 'www.bar.com',
     'custom-key': 'custom-value'
   },
-  buffer: util.concat(test_headers.slice(9, 13).map(function(test) { return test.buffer; }))
+  buffer: util.concat(test_headers.slice(9, 14).map(function(test) { return test.buffer; }))
 }, {
   headers: {
     ':method': 'GET',
@@ -337,15 +384,7 @@ var test_header_sets = [{
     ':authority': ['www.foo.com', 'www.bar.com'],
     'custom-key': 'custom-value'
   },
-  buffer: test_headers[3].buffer
-}, {
-  headers: {
-    ':status': '200',
-    'user-agent': 'my-user-agent',
-    'cookie': 'first; second; third; third; fourth',
-    'multiple': ['first', 'second', 'third', 'third; fourth'],
-    'verylong': (new Buffer(9000)).toString('hex')
-  }
+  buffer: util.concat(test_headers.slice(14, 19).map(function(test) { return test.buffer; }))
 }];
 
 describe('compressor.js', function() {
@@ -452,6 +491,7 @@ describe('compressor.js', function() {
       it('should return the parsed header set in { name1: value1, name2: [value2, value3], ... } format', function() {
         var decompressor = new Decompressor(util.log, 'REQUEST');
         for (var i = 0; i < test_header_sets.length - 1; i++) {
+          console.log('checking header set ' + i);
           var header_set = test_header_sets[i];
           expect(decompressor.decompress(header_set.buffer)).to.deep.equal(header_set.headers);
         }
