@@ -491,7 +491,6 @@ describe('compressor.js', function() {
       it('should return the parsed header set in { name1: value1, name2: [value2, value3], ... } format', function() {
         var decompressor = new Decompressor(util.log, 'REQUEST');
         for (var i = 0; i < test_header_sets.length - 1; i++) {
-          console.log('checking header set ' + i);
           var header_set = test_header_sets[i];
           expect(decompressor.decompress(header_set.buffer)).to.deep.equal(header_set.headers);
         }
