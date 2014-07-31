@@ -1,6 +1,12 @@
 Version history
 ===============
 
+### 0.14.0 (2014-07-31) ###
+
+* Upgrade to the latest draft: [draft-ietf-httpbis-http2-14][draft-14]
+
+[draft-14]: http://tools.ietf.org/html/draft-ietf-httpbis-http2-14
+
 ### 0.13.0 (2014-06-18) ###
 
 * Upgrade to the latest draft: [draft-ietf-httpbis-http2-13][draft-13]
