@@ -84,4 +84,4 @@ exports.shuffleBuffers = function shuffleBuffers(buffers) {
   }
 
   return output;
-}
+};
