@@ -224,13 +224,17 @@ describe('connection.js', function() {
         });
       });
     });
-    describe('closing the connection on one end', function() {
-      it('should result in closed streams on both ends', function(done) {
-        done = util.callNTimes(2, done);
-        c.on('end', done);
-        s.on('end', done);
+    describe('receiving GOAWAY', function() {
+      it('should make creating new streams impossible', function() {
+        // Before and after the server sends GOAWAY
+        expect(c.createStream()).to.not.equal(null);
+        s.goaway();
+        expect(c.createStream()).to.equal(null);
 
-        c.close();
+        // Before and after the client sends GOAWAY
+        expect(s.createStream()).to.not.equal(null);
+        c.goaway();
+        expect(s.createStream()).to.equal(null);
       });
     });
   });
