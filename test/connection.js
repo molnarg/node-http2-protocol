@@ -82,8 +82,8 @@ describe('connection.js', function() {
   describe('test scenario', function() {
     var c, s;
     beforeEach(function() {
-      c = new Connection(util.log.child({ role: 'client' }), 1, settings);
-      s = new Connection(util.log.child({ role: 'client' }), 2, settings);
+      c = new Connection(util.clientLog, 1, settings);
+      s = new Connection(util.serverLog, 2, settings);
       c.pipe(s).pipe(c);
     });
 
