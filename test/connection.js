@@ -84,7 +84,7 @@ describe('connection.js', function() {
     beforeEach(function() {
       c = new Connection(util.clientLog, 1, settings);
       s = new Connection(util.serverLog, 2, settings);
-      c.pipe(s).pipe(c);
+      c.pipe(new util.CloneStream()).pipe(s).pipe(new util.CloneStream()).pipe(c);
     });
 
     describe('connection setup', function() {
@@ -235,6 +235,50 @@ describe('connection.js', function() {
         expect(s.createStream()).to.not.equal(null);
         c.goaway();
         expect(s.createStream()).to.equal(null);
+      });
+    });
+    describe('making a request and then closing the connection', function() {
+      it('should gracefully end the connection', function(done) {
+        // Request and response data
+        var request_headers = {
+          ':method': 'GET',
+          ':path': '/'
+        };
+        var request_data = new Buffer(0);
+        var response_headers = {
+          ':status': '200'
+        };
+        var response_data = new Buffer('12345678', 'hex');
+
+        // Setting up server
+        s.on('stream', function(server_stream) {
+          server_stream.on('headers', function(headers) {
+            expect(headers).to.deep.equal(request_headers);
+            server_stream.headers(response_headers);
+            server_stream.end(response_data);
+          });
+        });
+
+        // Sending request
+        var client_stream = c.createStream();
+        client_stream.headers(request_headers);
+        client_stream.end(request_data);
+
+        // Closing the connection
+        c.close();
+
+        // Waiting for answer and then for the TCP connection to end gracefully
+        done = util.callNTimes(4, done);
+        client_stream.on('headers', function(headers) {
+          expect(headers).to.deep.equal(response_headers);
+          done();
+        });
+        client_stream.on('data', function(data) {
+          expect(data).to.deep.equal(response_data);
+          done();
+        });
+        c.on('finish', done);
+        s.on('finish', done);
       });
     });
   });
